@@ -126,76 +126,52 @@
     </div>
 
     <script>
-        const form = document.getElementById('menu-form');
-        const input = document.getElementById('ingredients');
-        const resultDisplay = document.getElementById('result-display');
-        const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('menu-form');
+    const input = document.getElementById('ingredients');
+    const resultDisplay = document.getElementById('result-display');
+    const submitBtn = document.getElementById('submit-btn');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
 
-            const ingredients = input.value;
-            if (!ingredients) {
-                resultDisplay.textContent = '食材を入力してください。';
-                return;
-            }
-
-            // ローディング中にボタンを無効化
-            submitBtn.disabled = true;
-            submitBtn.textContent = '考え中... 🧠';
-            resultDisplay.textContent = 'AIが献立を考えています...';
-
-            try {
-                // --- (シミュレーション) ---
-                // 本来はここでバックエンドのAPIを呼び出す
-                // const response = await fetch('/api/generate-menu', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ ingredients: ingredients })
-                // });
-                // const data = await response.json();
-                // resultDisplay.textContent = data.menu;
-
-                // --- ダミーの応答（シミュレーション用） ---
-                const dummyResponse = await fakeApiCall(ingredients);
-                resultDisplay.textContent = dummyResponse.menu;
-
-            } catch (error) {
-                console.error('エラー:', error);
-                resultDisplay.textContent = 'エラーが発生しました。もう一度お試しください。';
-            } finally {
-                // ボタンを元に戻す
-                submitBtn.disabled = false;
-                submitBtn.textContent = '献立を考えてもらう';
-            }
-        });
-
-        /**
-         * (シミュレーション用)
-         * バックエンドAPIのふりをするダミー関数
-         */
-        function fakeApiCall(ingredients) {
-            console.log(`(シミュレーション) バックエンドに「${ingredients}」を送信中...`);
-
-            // 2秒待ってからダミーの答えを返す
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const dummyMenu = `「${ingredients}」を使った献立の提案です！\n
-1. **親子丼**
-   - ${ingredients.includes('鶏肉') && ingredients.includes('卵') && ingredients.includes('玉ねぎ') ? '全ての材料が揃っていますね！' : ''}
-   - 玉ねぎと鶏肉を甘辛いだしで煮込み、卵でとじます。ご飯に乗せれば完成です。
-
-2. **玉ねぎと鶏肉の照り焼き**
-   - 鶏肉を焼き、玉ねぎと炒め合わせます。醤油、みりん、酒で味付けするだけで簡単です。
-
-3. **オニオンスープ（卵入り）**
-   - 玉ねぎをじっくり炒め、コンソメスープで煮込みます。最後に溶き卵を流し入れて完成です。`;
-
-                    resolve({ menu: dummyMenu });
-                }, 2000); // 2秒待つ
-            });
+        const ingredients = input.value;
+        if (!ingredients) {
+            resultDisplay.textContent = '食材を入力してください。';
+            return;
         }
-    </script>
+
+        // ローディング中にボタンを無効化
+        submitBtn.disabled = true;
+        submitBtn.textContent = '考え中... 🧠';
+        resultDisplay.textContent = 'AIが献立を考えています...';
+
+        try {
+            
+            const functionUrl = 'https://us-central1-955306222881.cloudfunctions.net/suggestMenu'; 
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: ingredients })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Functions Error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            resultDisplay.textContent = data.menu;
+
+        } catch (error) {
+            console.error('エラー:', error);
+            resultDisplay.textContent = `エラーが発生しました。ページをリロードしてもう一度ボタンを押下してください。: ${error.message}`;
+        } finally {
+            // ボタンを元に戻す
+            submitBtn.disabled = false;
+            submitBtn.textContent = '献立を考えてもらう';
+        }
+    });
+</script>
 
 </body>
 
