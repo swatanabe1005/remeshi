@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0YRL3G71V3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-0YRL3G71V3');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI献立サポーター</title>
@@ -15,6 +24,7 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             width: 100%;
             max-width: 600px;
@@ -23,24 +33,29 @@
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
+
         h1 {
             text-align: center;
             color: #333;
             margin-top: 0;
         }
+
         #menu-form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
+
         #ingredients {
             width: 100%;
             padding: 12px;
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box; /* paddingを含めて幅を100%に */
+            box-sizing: border-box;
+            /* paddingを含めて幅を100%に */
         }
+
         #submit-btn {
             padding: 12px 20px;
             font-size: 1rem;
@@ -52,29 +67,35 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         #submit-btn:hover {
             background-color: #0056b3;
         }
+
         #submit-btn:disabled {
             background-color: #999;
             cursor: not-allowed;
         }
+
         h2 {
             margin-top: 30px;
             border-bottom: 2px solid #eee;
             padding-bottom: 5px;
         }
+
         #result-display {
             background-color: #f9f9f9;
             border: 1px solid #eee;
             border-radius: 8px;
             padding: 20px;
             min-height: 150px;
-            white-space: pre-wrap; /* AIの改行をそのまま表示するため */
+            white-space: pre-wrap;
+            /* AIの改行をそのまま表示するため */
             line-height: 1.6;
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -84,7 +105,7 @@
             <input type="text" id="ingredients" placeholder="例: 鶏肉, 玉ねぎ, 卵">
             <button type="submit" id="submit-btn">献立を考えてもらう</button>
         </form>
-        
+
         <h2>AIからの提案:</h2>
         <div id="result-display">
             <p>ここに結果が表示されます...</p>
@@ -99,7 +120,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
-            
+
             const ingredients = input.value;
             if (!ingredients) {
                 resultDisplay.textContent = '食材を入力してください。';
@@ -121,7 +142,7 @@
                 // });
                 // const data = await response.json();
                 // resultDisplay.textContent = data.menu;
-                
+
                 // --- ダミーの応答（シミュレーション用） ---
                 const dummyResponse = await fakeApiCall(ingredients);
                 resultDisplay.textContent = dummyResponse.menu;
@@ -142,7 +163,7 @@
          */
         function fakeApiCall(ingredients) {
             console.log(`(シミュレーション) バックエンドに「${ingredients}」を送信中...`);
-            
+
             // 2秒待ってからダミーの答えを返す
             return new Promise((resolve) => {
                 setTimeout(() => {
@@ -156,7 +177,7 @@
 
 3. **オニオンスープ（卵入り）**
    - 玉ねぎをじっくり炒め、コンソメスープで煮込みます。最後に溶き卵を流し入れて完成です。`;
-                    
+
                     resolve({ menu: dummyMenu });
                 }, 2000); // 2秒待つ
             });
@@ -164,4 +185,5 @@
     </script>
 
 </body>
+
 </html>
