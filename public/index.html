@@ -11,16 +11,18 @@
 
         gtag('config', 'G-0YRL3G71V3');
     </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9244518389346458"
+        crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>【AI献立サポーター】冷蔵庫の食材から献立を自動提案！ | remeshi</title>
+    <title>【AIレシピ作成ツール】冷蔵庫の食材から献立を自動提案！ | remeshi</title>
 
     <meta name="description" content="冷蔵庫にある食材（鶏肉、玉ねぎ、卵など）を入力するだけで、AI（人工知能）が最適な献立を瞬時に提案します。今日の夕食の悩みを解決！">
 
     <meta name="keywords" content="AI, 献立, 食材, レシピ, 料理, 提案, サポート, 夕食, Gemini">
 
-    <meta property="og:title" content="AI献立サポーター | 食材を入力して献立を自動提案">
+    <meta property="og:title" content="AIレシピ作成ツール | 食材を入力して献立を自動提案">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://remeshi.web.app">
     <meta property="og:image" content="https://remeshi.web.app/images/menu.png">
@@ -112,7 +114,7 @@
 <body>
 
     <div class="container">
-        <h1>AI献立サポーター 💡</h1>
+        <h1>AIレシピ作成ツール 💡</h1>
         <form id="menu-form">
             <label for="ingredients"><b>冷蔵庫にある食材を教えてください:</b></label>
             <input type="text" id="ingredients" placeholder="例: 鶏肉, 玉ねぎ, 卵">
@@ -126,52 +128,52 @@
     </div>
 
     <script>
-    const form = document.getElementById('menu-form');
-    const input = document.getElementById('ingredients');
-    const resultDisplay = document.getElementById('result-display');
-    const submitBtn = document.getElementById('submit-btn');
+        const form = document.getElementById('menu-form');
+        const input = document.getElementById('ingredients');
+        const resultDisplay = document.getElementById('result-display');
+        const submitBtn = document.getElementById('submit-btn');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
 
-        const ingredients = input.value;
-        if (!ingredients) {
-            resultDisplay.textContent = '食材を入力してください。';
-            return;
-        }
-
-        // ローディング中にボタンを無効化
-        submitBtn.disabled = true;
-        submitBtn.textContent = '考え中... 🧠';
-        resultDisplay.textContent = 'AIが献立を考えています...';
-
-        try {
-            
-            const functionUrl = 'https://us-central1-remeshi.cloudfunctions.net/suggestMenu'; 
-
-            const response = await fetch(functionUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ingredients: ingredients })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Functions Error: ${response.statusText}`);
+            const ingredients = input.value;
+            if (!ingredients) {
+                resultDisplay.textContent = '食材を入力してください。';
+                return;
             }
 
-            const data = await response.json();
-            resultDisplay.textContent = data.menu;
+            // ローディング中にボタンを無効化
+            submitBtn.disabled = true;
+            submitBtn.textContent = '考え中... 🧠';
+            resultDisplay.textContent = 'AIが献立を考えています...';
 
-        } catch (error) {
-            console.error('エラー:', error);
-            resultDisplay.textContent = `エラーが発生しました。ページをリロードしてもう一度ボタンを押下してください。: ${error.message}`;
-        } finally {
-            // ボタンを元に戻す
-            submitBtn.disabled = false;
-            submitBtn.textContent = '献立を考えてもらう';
-        }
-    });
-</script>
+            try {
+
+                const functionUrl = 'https://us-central1-remeshi.cloudfunctions.net/suggestMenu';
+
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ingredients: ingredients })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Functions Error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                resultDisplay.textContent = data.menu;
+
+            } catch (error) {
+                console.error('エラー:', error);
+                resultDisplay.textContent = `エラーが発生しました。ページをリロードしてもう一度ボタンを押下してください。: ${error.message}`;
+            } finally {
+                // ボタンを元に戻す
+                submitBtn.disabled = false;
+                submitBtn.textContent = '献立を考えてもらう';
+            }
+        });
+    </script>
 
 </body>
 
