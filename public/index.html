@@ -116,6 +116,19 @@
     <div class="container">
         <h1>AIレシピ作成ツール 💡</h1>
         <form id="menu-form">
+            <div>
+                <label>
+                    <input type="checkbox" id="allowOtherIngredients" checked>
+                    **入力食材以外も使用する**
+                </label>
+            </div>
+
+            <div>
+                <label>
+                    <input type="checkbox" id="isDietMenu">
+                    **ダイエット/低カロリー献立にする**
+                </label>
+            </div>
             <label for="ingredients"><b>冷蔵庫にある食材を教えてください:</b></label>
             <input type="text" id="ingredients" placeholder="例: 鶏肉, 玉ねぎ, 卵">
             <button type="submit" id="submit-btn">献立を考えてもらう</button>
@@ -132,6 +145,9 @@
         const input = document.getElementById('ingredients');
         const resultDisplay = document.getElementById('result-display');
         const submitBtn = document.getElementById('submit-btn');
+        const ingredients = document.getElementById('ingredientsInput').value;
+        const allowOther = document.getElementById('allowOtherIngredients').checked;
+        const isDiet = document.getElementById('isDietMenu').checked;
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
@@ -146,6 +162,12 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '考え中... 🧠';
             resultDisplay.textContent = 'AIが献立を考えています...';
+
+            const requestBody = {
+                ingredients: ingredients,
+                allowOtherIngredients: allowOther,
+                isDietMenu: isDiet
+            };
 
             try {
 
