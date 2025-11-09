@@ -165,9 +165,6 @@
         const input = document.getElementById('ingredients');
         const resultDisplay = document.getElementById('result-display');
         const submitBtn = document.getElementById('submit-btn');
-        const ingredients = document.getElementById('ingredients').value;
-        const onlyInput = document.getElementById('onlyInputIngredients').checked;
-        const isDiet = document.getElementById('isDietMenu').checked;
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
@@ -196,15 +193,35 @@
                 const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ingredients: ingredients })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
                     throw new Error(`Functions Error: ${response.statusText}`);
                 }
 
-                const data = await response.json();
-                resultDisplay.textContent = data.menu;
+                // 結果表示エリアを空にする
+                resultDisplay.textContent = '';
+
+                // 応答ボディをReadableStreamとして取得
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                // ストリームの読み取りループを開始
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    // ストリームが終了したらループを抜ける
+                    if (done) {
+                        break;
+                    }
+
+                    // データ（チャンク）をデコードし、画面に追加
+                    const chunk = decoder.decode(value, { stream: true });
+                    resultDisplay.textContent += chunk;
+
+                    // 画面のスクロールを下に移動 (長いコンテンツの場合)
+                    resultDisplay.scrollTop = resultDisplay.scrollHeight;
+                }
 
             } catch (error) {
                 console.error('エラー:', error);
@@ -216,18 +233,19 @@
             }
         });
     </script>
-    
-<footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
-    <p style="margin-bottom: 10px;">
-        <a href="privacyPolicy.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">プライバシーポリシー</a>
-        <span style="color: #bbb;">|</span>
-        <a href="termsOfService.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">利用規約</a>
-        <span style="color: #bbb;">|</span>
-    </p>
-    <p style="color: #777; margin: 0;">
-        &copy; 2025 remeshi All Rights Reserved.
-    </p>
-</footer>
+
+    <footer
+        style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
+        <p style="margin-bottom: 10px;">
+            <a href="privacyPolicy.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">プライバシーポリシー</a>
+            <span style="color: #bbb;">|</span>
+            <a href="termsOfService.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">利用規約</a>
+            <span style="color: #bbb;">|</span>
+        </p>
+        <p style="color: #777; margin: 0;">
+            &copy; 2025 remeshi All Rights Reserved.
+        </p>
+    </footer>
 </body>
 
 </html>
