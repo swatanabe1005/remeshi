@@ -166,28 +166,35 @@
         const resultDisplay = document.getElementById('result-display');
         const submitBtn = document.getElementById('submit-btn');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // フォームの送信（ページリロード）を防ぐ
+        // チェックボックス要素の参照を定義
+        const onlyInputCheckbox = document.getElementById('onlyInputIngredients');
+        const isDietCheckbox = document.getElementById('isDietMenu');
 
-            const ingredients = input.value;
-            if (!ingredients) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // ボタンクリック時に最新の値を要素から直接取得。
+            const ingredientsValue = input.value;
+            const onlyInputChecked = onlyInputCheckbox.checked;
+            const isDietChecked = isDietCheckbox.checked;
+
+            if (!ingredientsValue) {
                 resultDisplay.textContent = '食材を入力してください。';
                 return;
             }
 
-            // ローディング中にボタンを無効化
+            // ローディング処理
             submitBtn.disabled = true;
             submitBtn.textContent = '考え中... 🧠';
             resultDisplay.textContent = 'AIが献立を考えています...';
 
             const requestBody = {
-                ingredients: ingredients,
-                onlyInputIngredients: onlyInput,
-                isDietMenu: isDiet
+                ingredients: ingredientsValue,
+                onlyInputIngredients: onlyInputChecked,
+                isDietMenu: isDietChecked
             };
 
             try {
-
                 const functionUrl = 'https://us-central1-remeshi.cloudfunctions.net/suggestMenu';
 
                 const response = await fetch(functionUrl, {
@@ -197,43 +204,45 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Functions Error: ${response.statusText}`);
+                    // エラー応答を処理し、エラーメッセージを取得する
+                    const errorText = await response.text();
+                    let errorMessage = `Functions Error: ${response.status} - ${response.statusText}`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.error || errorMessage;
+                    } catch (e) {
+                        // JSONパース失敗時はそのままのテキストを使う
+                    }
+                    throw new Error(errorMessage);
                 }
 
-                // 結果表示エリアを空にする
+                // ストリーミング処理の開始
                 resultDisplay.textContent = '';
-
-                // 応答ボディをReadableStreamとして取得
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder("utf-8");
-                // ストリームの読み取りループを開始
+
                 while (true) {
                     const { done, value } = await reader.read();
 
-                    // ストリームが終了したらループを抜ける
                     if (done) {
                         break;
                     }
 
-                    // データ（チャンク）をデコードし、画面に追加
                     const chunk = decoder.decode(value, { stream: true });
                     resultDisplay.textContent += chunk;
 
-                    // 画面のスクロールを下に移動 (長いコンテンツの場合)
                     resultDisplay.scrollTop = resultDisplay.scrollHeight;
                 }
 
             } catch (error) {
                 console.error('エラー:', error);
-                resultDisplay.textContent = `エラーが発生しました。ページをリロードしてもう一度ボタンを押下してください。: ${error.message}`;
+                resultDisplay.textContent = `エラーが発生しました。詳細: ${error.message}`;
             } finally {
-                // ボタンを元に戻す
                 submitBtn.disabled = false;
                 submitBtn.textContent = '献立を考えてもらう';
             }
         });
     </script>
-
     <footer
         style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
         <p style="margin-bottom: 10px;">
