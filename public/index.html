@@ -19,9 +19,7 @@
     <title>【AIレシピ作成ツール】冷蔵庫の食材から献立を自動提案！ | remeshi</title>
 
     <meta name="description" content="冷蔵庫にある食材（鶏肉、玉ねぎ、卵など）を入力するだけで、AI（人工知能）が最適な献立を瞬時に提案します。今日の夕食の悩みを解決！">
-
     <meta name="keywords" content="AI, 献立, 食材, レシピ, 料理, 提案, サポート, 夕食, Gemini">
-
     <meta property="og:title" content="AIレシピ作成ツール | 食材を入力して献立を自動提案">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://remeshi.web.app">
@@ -118,8 +116,8 @@
         <form id="menu-form">
             <div>
                 <label>
-                    <input type="checkbox" id="allowOtherIngredients" checked>
-                    **入力食材以外も使用する**
+                    <input type="checkbox" id="onlyInputIngredients">
+                    **入力した食材のみを使用する**
                 </label>
             </div>
 
@@ -133,6 +131,27 @@
             <input type="text" id="ingredients" placeholder="例: 鶏肉, 玉ねぎ, 卵">
             <button type="submit" id="submit-btn">献立を考えてもらう</button>
         </form>
+        <div
+            style="margin-top: 30px; padding: 20px; background-color: #f7f9fc; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <h3 style="margin-top: 0; color: #1a73e8; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;">
+                💡 AI献立提案ツール「remeshi」について
+            </h3>
+            <p style="line-height: 1.6; color: #555;">
+                毎日の献立を考える時間と労力を削減するため、remeshiはGoogleの最先端AIモデル **Gemini**
+                を活用しています。冷蔵庫の残り物（鶏肉、キャベツ、きのこなど）を入力するだけで、無駄なく使い切るための最適な3品（主菜、副菜、汁物）を瞬時に提案します。
+            </p>
+
+            <h4 style="margin-top: 15px; color: #333;">【remeshiの３つの特長】</h4>
+            <ul style="color: #555; padding-left: 20px;">
+                <li>**食材ロスを削減:** 入力食材を最大限に活かす献立で、食品廃棄物を減らします。</li>
+                <li>**栄養バランスを考慮:** プロの栄養士の知見に基づき、健康的な食卓をサポートします。</li>
+                <li>**柔軟な提案:** 「入力食材のみ」や「ダイエット/低カロリー」などのオプションで、利用者のニーズに完全に合わせた提案を実現します。</li>
+            </ul>
+
+            <p style="margin-top: 15px; font-size: 0.9em; color: #777;">
+                ※ AIの提案はあくまで参考情報です。調理の際は、必ずご自身の責任と判断のもとで食材の安全性や衛生管理にご注意ください。
+            </p>
+        </div>
 
         <h2>AIからの提案:</h2>
         <div id="result-display">
@@ -146,7 +165,7 @@
         const resultDisplay = document.getElementById('result-display');
         const submitBtn = document.getElementById('submit-btn');
         const ingredients = document.getElementById('ingredients').value;
-        const allowOther = document.getElementById('allowOtherIngredients').checked;
+        const onlyInput = document.getElementById('onlyInputIngredients').checked;
         const isDiet = document.getElementById('isDietMenu').checked;
 
         form.addEventListener('submit', async (e) => {
@@ -165,7 +184,7 @@
 
             const requestBody = {
                 ingredients: ingredients,
-                allowOtherIngredients: allowOther,
+                onlyInputIngredients: onlyInput,
                 isDietMenu: isDiet
             };
 
@@ -196,7 +215,18 @@
             }
         });
     </script>
-
+    
+<footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
+    <p style="margin-bottom: 10px;">
+        <a href="privacyPolicy.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">プライバシーポリシー</a>
+        <span style="color: #bbb;">|</span>
+        <a href="termsOfService.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">利用規約</a>
+        <span style="color: #bbb;">|</span>
+    </p>
+    <p style="color: #777; margin: 0;">
+        &copy; 2025 remeshi All Rights Reserved.
+    </p>
+</footer>
 </body>
 
 </html>

@@ -28,28 +28,33 @@ export const suggestMenu = https.onRequest({ secrets: ["GEMINI_API_KEY"], cpu: 1
 
     const ingredients: string = request.body.ingredients;
     // チェックボックスの値を取得
-    const allowOther: boolean = request.body.allowOtherIngredients;
+    const onlyInput: boolean = request.body.onlyInputIngredients;
     const dietConstraint: boolean = request.body.isDietMenu;
 
     if (!ingredients) {
       return response.status(400).send({ error: "食材名（ingredients）が必要です。" });
     }
 
-    let constraintPrompt = `食材: ${ingredients}`;
-    let basePrompt = "あなたはプロの栄養士です。以下の食材を使って、健康的で美味しい3品（主菜、副菜、汁物）の夕食献立を考えてください。";
+    let basePrompt = "あなたはプロの栄養士です。以下の食材を使って、健康的で美味しい献立を考えてください。";
+    let constraint = "";
 
     // 1. 食材の制約
-    if (!allowOther) {
-      // チェックがない場合: 入力食材のみ
-      constraintPrompt = `以下の入力食材【のみ】を使って献立を考えてください。追加食材は【一切】使用しないでください。${constraintPrompt}`;
+    if (onlyInput) {
+      // 入力食材のみ
+      constraint += "【重要】入力された食材のみを使用してください。追加食材は【一切】使用しないでください。調味料は使用してもかまいません。\n";
     }
 
     // 2. ダイエットの制約 (例)
     if (dietConstraint) {
-      basePrompt = `あなたはプロのダイエット栄養士です。カロリーと糖質を抑えたヘルシーな3品`;
+      constraint += "【重要】献立は、カロリーと糖質を最大限に抑えたヘルシーな内容にしてください。\n";
     }
     const detailPrompt = "各料理のタイトル、必要な追加食材、簡単な調理手順を、日本語のMarkdown形式（箇条書きや見出し）で構造化して出力してください。"; 
-    const prompt = `${basePrompt}${detailPrompt}${constraintPrompt}`;
+    // const prompt = `${basePrompt}${detailPrompt}${constraintPrompt}`;
+    const prompt = 
+        `${basePrompt}\n` + 
+        `${constraint}\n` + // チェックボックスによる追加命令がここに入る
+        `${detailPrompt}\n` +
+        `使用可能な食材: ${ingredients}`;
 
     try {
       const model = "gemini-2.5-flash";
