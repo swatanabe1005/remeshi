@@ -105,11 +105,13 @@
             padding-bottom: 5px;
             margin-top: 25px;
         }
+
         #result-display h2 {
             color: #007bff;
             font-size: 1.4rem;
             margin-top: 20px;
         }
+
         #result-display h3 {
             /* AI出力内の小見出しに適用 */
             color: #007bff;
@@ -124,10 +126,58 @@
             padding-left: 20px;
             margin-top: 5px;
         }
+
         #result-display li {
             margin-bottom: 5px;
         }
 
+        /* レシピタイトル全体 (Markdownの # に対応) */
+        #result-display h1 {
+            color: #333;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+
+        /* 材料・作り方のセクションタイトル (Markdownの ## に対応) */
+        #result-display h2 {
+            color: #007bff;
+            /* メインカラーを使用 */
+            font-size: 1.4rem;
+            border-bottom: 1px dashed #eee;
+            /* 実線から破線に変更 */
+            padding-bottom: 3px;
+            margin-top: 20px;
+            /* 上部のスペースを確保 */
+            margin-bottom: 10px;
+            /* 下部のスペースを確保 */
+        }
+
+        /* リストアイテム全体（材料のリストなど） */
+        #result-display ul {
+            list-style-type: square;
+            /* リストの記号を四角に */
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        #result-display li {
+            margin-bottom: 5px;
+        }
+
+        /* 作り方（Markdownの 1. 2. 3. に対応） */
+        #result-display ol {
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        #result-display ol li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 
