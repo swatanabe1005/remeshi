@@ -4,6 +4,7 @@
 <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0YRL3G71V3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -97,28 +98,18 @@
             padding-bottom: 5px;
         }
 
-        #result-display {
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 20px;
-            min-height: 150px;
-            white-space: pre-wrap;
-            /* AIの改行をそのまま表示するため */
-            line-height: 1.6;
+        #result-display h1 {
+            color: #333;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            margin-top: 25px;
         }
-
-        #result-display ul {
-            /* AI出力の箇条書きに適用 */
-            list-style-type: disc;
-            margin-left: 20px;
-            padding-left: 0;
+        #result-display h2 {
+            color: #007bff;
+            font-size: 1.4rem;
+            margin-top: 20px;
         }
-
-        #result-display li {
-            margin-bottom: 8px;
-        }
-
         #result-display h3 {
             /* AI出力内の小見出しに適用 */
             color: #007bff;
@@ -127,6 +118,16 @@
             padding-bottom: 3px;
             margin-top: 25px;
         }
+
+        #result-display ul {
+            list-style-type: square;
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        #result-display li {
+            margin-bottom: 5px;
+        }
+
     </style>
 </head>
 
@@ -277,6 +278,7 @@
                 resultDisplay.textContent = '';
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder("utf-8");
+                let fullMarkdown = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -286,7 +288,8 @@
                     }
 
                     const chunk = decoder.decode(value, { stream: true });
-                    resultDisplay.innerHTML += chunk;
+                    fullMarkdown += chunk;
+                    resultDisplay.innerHTML = marked.parse(fullMarkdown);
 
                     resultDisplay.scrollTop = resultDisplay.scrollHeight;
                 }
@@ -307,6 +310,8 @@
             <span style="color: #bbb;">|</span>
             <a href="termsOfService.html" style="margin: 0 10px; color: #007bff; text-decoration: none;">利用規約</a>
             <span style="color: #bbb;">|</span>
+            <a href="mailto:remeshi.inquiry@gmail.com"
+                style="margin: 0 10px; color: #007bff; text-decoration: none;">お問い合わせ</a>
         </p>
         <p style="color: #777; margin: 0;">
             &copy; 2025 remeshi All Rights Reserved.
