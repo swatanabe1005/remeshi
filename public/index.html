@@ -132,6 +132,10 @@
             <input type="text" id="ingredients" placeholder="例: 鶏肉, 玉ねぎ, 卵">
             <button type="submit" id="submit-btn">献立を考えてもらう</button>
         </form>
+        <h2>AIからの提案:</h2>
+        <div id="result-display">
+            <p>ここに結果が表示されます...</p>
+        </div>
         <div
             style="margin-top: 30px; padding: 20px; background-color: #f7f9fc; border-radius: 10px; border: 1px solid #e0e0e0;">
             <h3 style="margin-top: 0; color: #1a73e8; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;">
@@ -153,10 +157,43 @@
                 ※ AIの提案はあくまで参考情報です。調理の際は、必ずご自身の責任と判断のもとで食材の安全性や衛生管理にご注意ください。
             </p>
         </div>
+        <div
+            style="margin-top: 50px; padding: 20px; background-color: #ffffff; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <h2 style="margin-top: 0; color: #333; border-bottom: 2px solid #1a73e8; padding-bottom: 5px;">
+                💡 よくある質問 (FAQ)
+            </h2>
 
-        <h2>AIからの提案:</h2>
-        <div id="result-display">
-            <p>ここに結果が表示されます...</p>
+            <div class="faq-item" style="margin-bottom: 20px;">
+                <h4 style="color: #007bff; margin-bottom: 5px;">Q1. AIが提案する献立は安全ですか？</h4>
+                <p style="margin-left: 15px; color: #555;">
+                    A.
+                    **AIの提案はあくまで参考情報**であり、その安全性や正確性を保証するものではありません。特に、食材の鮮度やアレルギーに関する情報はAIが判断できません。調理や食事に際しては、必ずご自身の責任と判断のもとで、食材の確認と衛生管理を徹底してください。
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px;">
+                <h4 style="color: #007bff; margin-bottom: 5px;">Q2. どんなAIモデルを使って献立を生成していますか？</h4>
+                <p style="margin-left: 15px; color: #555;">
+                    A. 当サイトでは、Googleの最新の生成AIモデルである **Gemini**
+                    を使用しています。このモデルは、大量のレシピデータと栄養学の知識に基づいて学習されており、栄養バランスと調理の手軽さを考慮した献立を提案します。
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px;">
+                <h4 style="color: #007bff; margin-bottom: 5px;">Q3. 「入力した食材のみを使用する」を選択した場合、調味料は使えますか？</h4>
+                <p style="margin-left: 15px; color: #555;">
+                    A.
+                    はい、使えます。この制約は、**主要な食材**（肉、魚、野菜など）の追加を禁止するものです。塩、砂糖、醤油、油、酒などの**基本的な調味料**は、献立に含まれていない場合でも自由に使用していただいて構いません。
+                </p>
+            </div>
+
+            <div class="faq-item" style="margin-bottom: 20px;">
+                <h4 style="color: #007bff; margin-bottom: 5px;">Q4. 献立のカロリーや栄養成分は表示されますか？</h4>
+                <p style="margin-left: 15px; color: #555;">
+                    A.
+                    現在、提案される献立には詳細なカロリーや栄養成分の数値は含まれていません。ただし、「**ダイエット/低カロリー献立にする**」オプションを選択した場合は、カロリーと糖質を抑えることを最優先に考慮してレシピを生成します。
+                </p>
+            </div>
         </div>
     </div>
 
@@ -229,7 +266,7 @@
                     }
 
                     const chunk = decoder.decode(value, { stream: true });
-                    resultDisplay.textContent += chunk;
+                    resultDisplay.innerHTML += chunk;
 
                     resultDisplay.scrollTop = resultDisplay.scrollHeight;
                 }

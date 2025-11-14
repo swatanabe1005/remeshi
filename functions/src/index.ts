@@ -50,12 +50,12 @@ export const suggestMenu = https.onRequest({
   if (dietConstraint) {
     constraint += "【重要】献立は、カロリーと糖質を最大限に抑えたヘルシーな内容にしてください。\n";
   }
-  const detailPrompt = "各料理のタイトル、必要な追加食材、簡単な調理手順を、日本語のMarkdown形式（箇条書きや見出し）で構造化して出力してください。";
+  const detailPrompt = "出力形式は以下のような形式としてください。見出しは大きく、材料名には下線を引いてわかりやすくしてください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
   const prompt =
     `${basePrompt}\n` +
+    `使用可能な食材: ${ingredients}` +
     `${constraint}\n` +
-    `${detailPrompt}\n` +
-    `使用可能な食材: ${ingredients}`;
+    `${detailPrompt}\n`;
 
   try {
     const model = "gemini-2.5-flash";
