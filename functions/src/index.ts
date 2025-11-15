@@ -10,7 +10,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
  */
 export const suggestMenu = https.onRequest({
   secrets: ["GEMINI_API_KEY"],
-  memory: "512MiB", // 高速化のためメモリを増強することを推奨
+  memory: "512MiB",
   cpu: 1
   // @ts-ignore
 }, async (request, response) => {
@@ -25,37 +25,55 @@ export const suggestMenu = https.onRequest({
   if (request.method !== "POST") {
     return response.status(405).send("Method Not Allowed");
   }
-  // レスポンスヘッダーをストリーミング用に設定
-  response.set("Content-Type", "text/plain; charset=utf-8"); // Content-Typeを text/plain に変更
 
+  // レスポンスヘッダーをストリーミング用に設定
+  response.set("Content-Type", "text/plain; charset=utf-8");
+
+  // リクエストボディから全てのパラメータを取得
   const ingredients: string = request.body.ingredients;
-  // チェックボックスの値を取得
   const onlyInput: boolean = request.body.onlyInputIngredients;
   const dietConstraint: boolean = request.body.isDietMenu;
+  const dishCount: string = request.body.dishCount;
+  const dishType: string = request.body.dishType;
+  const dishGenre: string = request.body.dishGenre;
 
   if (!ingredients) {
     return response.end(JSON.stringify({ error: "食材名（ingredients）が必要です。" }));
   }
 
-  let basePrompt = "以下の食材を使って、献立を考えてください。";
+  let basePrompt = "以下の食材を最大限に活用した献立とレシピを提案してください。";
   let constraint = "";
 
-  // 1. 食材の制約
+  // 1. チェックボックスの制約
   if (onlyInput) {
-    // 入力食材のみ
-    constraint += "入力された食材のみを使用してください。追加食材は使用しないでください。調味料は使用してもかまいません。\n";
+    constraint += "入力された食材のみを使用してください。追加食材は使用しないでください。基本的な調味料は使用してもかまいません。\n";
   }
-
-  // 2. ダイエットの制約 (例)
   if (dietConstraint) {
     constraint += "献立は、カロリーと糖質を最大限に抑えたヘルシーな内容にしてください。\n";
   }
+
+  // ★ 2. ドロップダウンの制約をプロンプトに組み込む ★
+  if (dishCount && dishCount !== 'おまかせ') {
+    constraint += `品数: 必ず **${dishCount}** の料理を提案してください。\n`;
+  } 
+
+  if (dishType && dishType !== 'おまかせ') {
+    constraint += `料理の種類: 提案する料理は、**${dishType}** をメインとしてください。\n`;
+  }
+
+  if (dishGenre && dishGenre !== 'おまかせ') {
+    constraint += `ジャンル: 提案する料理のジャンルは **${dishGenre}** に限定してください。\n`;
+  }
+  // ★
+
+  // 出力形式の指示 (Markdown)
   const detailPrompt = "出力形式は以下のような形式としてください。見出しは大きく、材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
+
   const prompt =
     `${basePrompt}\n` +
-    `使用可能な食材: ${ingredients}` +
-    `${constraint}\n` +
-    `${detailPrompt}\n`;
+    `使用可能な食材: ${ingredients}\n` +
+    `【制約・希望】\n${constraint}\n` +
+    `${detailPrompt}`;
 
   try {
     const model = "gemini-2.5-flash";
