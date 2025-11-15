@@ -37,18 +37,18 @@ export const suggestMenu = https.onRequest({
     return response.end(JSON.stringify({ error: "食材名（ingredients）が必要です。" }));
   }
 
-  let basePrompt = "以下の食材を使って、献立を考えてください。レシピの内容は検索結果上位に来るような内容が望ましいです。";
+  let basePrompt = "以下の食材を使って、献立を考えてください。";
   let constraint = "";
 
   // 1. 食材の制約
   if (onlyInput) {
     // 入力食材のみ
-    constraint += "【重要】入力された食材のみを使用してください。追加食材は【一切】使用しないでください。調味料は使用してもかまいません。\n";
+    constraint += "入力された食材のみを使用してください。追加食材は使用しないでください。調味料は使用してもかまいません。\n";
   }
 
   // 2. ダイエットの制約 (例)
   if (dietConstraint) {
-    constraint += "【重要】献立は、カロリーと糖質を最大限に抑えたヘルシーな内容にしてください。\n";
+    constraint += "献立は、カロリーと糖質を最大限に抑えたヘルシーな内容にしてください。\n";
   }
   const detailPrompt = "出力形式は以下のような形式としてください。見出しは大きく、材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
   const prompt =
