@@ -802,13 +802,29 @@
                 // モバイル
                 authMobileContainer.innerHTML = `<span style="display: block; margin-bottom: 5px;">${displayName}さんとしてログイン中</span>${logoutButtonHTML}`;
 
-                // ログアウト処理のイベントリスナー（ボタンがDOMに追加された後に設定）
-                document.getElementById('logout-btn').addEventListener('click', () => {
+                // ログアウト処理本体
+                const handleLogout = () => {
                     firebase.auth().signOut().then(() => {
                         alert("ログアウトしました。");
-                        // ページリロードやリダイレクトで表示をリセットするのが確実
+                        // ログアウト後の画面状態は onAuthStateChanged の else ブロックが自動で処理します。
+                    }).catch((error) => {
+                        console.error("ログアウトエラー:", error);
                     });
-                });
+                };
+
+                // DOM書き換え直後に、新しいボタン要素を取得してリスナーを設定
+
+                // PC版のボタン
+                const desktopLogoutBtn = authDesktopContainer.querySelector('#logout-btn');
+                if (desktopLogoutBtn) {
+                    desktopLogoutBtn.addEventListener('click', handleLogout);
+                }
+
+                // モバイル版のボタン
+                const mobileLogoutBtn = authMobileContainer.querySelector('#logout-btn');
+                if (mobileLogoutBtn) {
+                    mobileLogoutBtn.addEventListener('click', handleLogout);
+                }
 
             } else {
                 // --- 未ログイン ---
