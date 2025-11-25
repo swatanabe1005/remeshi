@@ -2,6 +2,10 @@
 <html lang="ja">
 
 <head>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0YRL3G71V3"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -29,6 +33,84 @@
     <meta property="og:description" content="冷蔵庫の残り物からAIが献立を瞬時に作成。無駄なく美味しい食卓をサポートします。">
     <meta property="og:site_name" content="remeshi">
     <style>
+        /* --- ヘッダーの基本スタイル --- */
+        .main-header {
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            /* 画面上部に固定 */
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        /* --- モバイルメニュー/ハンバーガーメニュー --- */
+
+        /* デフォルトではPCのナビゲーションを表示し、ハンバーガーを非表示 */
+        .hamburger-menu {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .mobile-menu {
+            display: none;
+            /* 初期状態では非表示 */
+            background-color: #f8f8f8;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+            padding: 10px 0;
+            z-index: 999;
+        }
+
+        .mobile-menu .auth-info,
+        .mobile-menu a {
+            display: block;
+            padding: 12px 20px;
+            text-align: center;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* --- レスポンシブ対応 (600px以下でモバイルレイアウトに切り替え) --- */
+        @media (max-width: 600px) {
+
+            /* PC用ナビゲーションを非表示 */
+            .nav-links {
+                display: none;
+            }
+
+            /* ハンバーガーメニューを表示 */
+            .hamburger-menu {
+                display: block;
+            }
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             display: flex;
@@ -68,7 +150,8 @@
             gap: 5px;
         }
 
-        #ingredients, .form-group select {
+        #ingredients,
+        .form-group select {
             width: 100%;
             padding: 12px;
             font-size: 1rem;
@@ -185,10 +268,215 @@
             margin-bottom: 10px;
             line-height: 1.6;
         }
+
+        /* Googleアイコンのスタイル */
+        .gsi-material-button {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -webkit-appearance: none;
+            background-color: WHITE;
+            background-image: none;
+            border: 1px solid #747775;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #1f1f1f;
+            cursor: pointer;
+            font-family: 'Roboto', arial, sans-serif;
+            font-size: 14px;
+            height: 40px;
+            letter-spacing: 0.25px;
+            outline: none;
+            overflow: hidden;
+            padding: 0 12px;
+            position: relative;
+            text-align: center;
+            -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+            transition: background-color .218s, border-color .218s, box-shadow .218s;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: auto;
+            max-width: 400px;
+            min-width: min-content;
+            margin: 0 auto;
+        }
+
+        .gsi-material-button .gsi-material-button-icon {
+            height: 20px;
+            margin-right: 12px;
+            min-width: 20px;
+            width: 20px;
+        }
+
+        .gsi-material-button .gsi-material-button-content-wrapper {
+            -webkit-align-items: center;
+            align-items: center;
+            display: flex;
+            -webkit-flex-direction: row;
+            flex-direction: row;
+            -webkit-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+            height: 100%;
+            justify-content: space-between;
+            position: relative;
+            width: 100%;
+        }
+
+        .gsi-material-button .gsi-material-button-contents {
+            -webkit-flex-grow: 1;
+            flex-grow: 1;
+            font-family: 'Roboto', arial, sans-serif;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: top;
+        }
+
+        .gsi-material-button .gsi-material-button-state {
+            -webkit-transition: opacity .218s;
+            transition: opacity .218s;
+            bottom: 0;
+            left: 0;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .gsi-material-button:disabled {
+            cursor: default;
+            background-color: #ffffff61;
+            border-color: #1f1f1f1f;
+        }
+
+        .gsi-material-button:disabled .gsi-material-button-contents {
+            opacity: 38%;
+        }
+
+        .gsi-material-button:disabled .gsi-material-button-icon {
+            opacity: 38%;
+        }
+
+        .gsi-material-button:not(:disabled):active .gsi-material-button-state,
+        .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+            background-color: #303030;
+            opacity: 12%;
+        }
+
+        .gsi-material-button:not(:disabled):hover {
+            -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+        }
+
+        .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+            background-color: #303030;
+            opacity: 8%;
+        }
     </style>
 </head>
 
 <body>
+    <header class="main-header">
+        <div class="header-content">
+            <a href="/" class="site-title">AIレシピ remeshi 💡</a>
+
+            <nav class="nav-links">
+                <div id="auth-desktop" class="auth-info">
+                    <button id="desktop-google-login-btn" class="gsi-material-button">
+                        <div class="gsi-material-button-state"></div>
+                        <div class="gsi-material-button-content-wrapper">
+                            <div class="gsi-material-button-icon">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                    <path fill="#EA4335"
+                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                    </path>
+                                    <path fill="#4285F4"
+                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                    </path>
+                                    <path fill="#FBBC05"
+                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                    </path>
+                                    <path fill="#34A853"
+                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                    </path>
+                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                </svg>
+                            </div>
+                            <span class="gsi-material-button-contents">Google でログイン</span>
+                        </div>
+                    </button>
+                </div>
+            </nav>
+
+            <nav class="mobile-menu" id="mobile-menu">
+                <div id="auth-mobile" class="auth-info">
+                    <button id="mobile-google-login-btn" class="gsi-material-button">
+                        <div class="gsi-material-button-state"></div>
+                        <div class="gsi-material-button-content-wrapper">
+                            <div class="gsi-material-button-icon">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                    <path fill="#EA4335"
+                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                    </path>
+                                    <path fill="#4285F4"
+                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                    </path>
+                                    <path fill="#FBBC05"
+                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                    </path>
+                                    <path fill="#34A853"
+                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                    </path>
+                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                </svg>
+                            </div>
+                            <span class="gsi-material-button-contents">Google でログイン</span>
+                        </div>
+                    </button>
+                </div>
+                <a href="#favorites">お気に入り一覧</a>
+            </nav>
+
+            <button class="hamburger-menu" id="hamburger-btn">
+                ☰
+            </button>
+        </div>
+
+        <nav class="mobile-menu" id="mobile-menu">
+            <div id="auth-mobile" class="auth-info">
+                <button class="gsi-material-button">
+                    <div class="gsi-material-button-state"></div>
+                    <div class="gsi-material-button-content-wrapper">
+                        <div class="gsi-material-button-icon">
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                <path fill="#EA4335"
+                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                </path>
+                                <path fill="#4285F4"
+                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                </path>
+                                <path fill="#FBBC05"
+                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                </path>
+                                <path fill="#34A853"
+                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                </path>
+                                <path fill="none" d="M0 0h48v48H0z"></path>
+                            </svg>
+                        </div>
+                        <span class="gsi-material-button-contents">Google でログイン</span>
+                        <span style="display: none;">Google でログイン</span>
+                    </div>
+                </button>
+            </div>
+            <a href="#favorites">お気に入り一覧</a>
+        </nav>
+    </header>
 
     <div class="container">
         <h1>AIレシピ作成ツール 💡</h1>
@@ -245,6 +533,17 @@
         <div id="result-display"
             style="margin-top: 30px; padding: 20px; background-color: #ffffff; border-radius: 10px; border: 1px solid #e0e0e0;">
             <p>ここに結果が表示されます...</p>
+        </div>
+        <button id="favorite-btn"
+            style="display:none; margin-top: 10px; padding: 10px 20px; font-size: 1rem; background-color: #f7b731; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            ★ このレシピをお気に入りに保存
+        </button>
+        <button id="show-favorites-btn"
+            style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background-color: #55acee; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            お気に入り一覧を見る
+        </button>
+
+        <div id="favorites-list" style="margin-top: 20px; border-top: 1px solid #ddd;">
         </div>
         <!-- Google AdSense 広告コンテナ -->
         <div id="ad-container-1" style="text-align: center; margin-top: 0px; display: block;">
@@ -313,6 +612,26 @@
                     現在、提案される献立には詳細なカロリーや栄養成分の数値は含まれていません。ただし、「<strong>ダイエット/低カロリー献立にする</strong>」オプションを選択した場合は、カロリーと糖質を抑えることを最優先に考慮してレシピを生成します。
                 </p>
             </div>
+        </div>
+        <div
+            style="margin-top: 30px; padding: 20px; background-color: #f7f9fc; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <h4 style="margin-top: 25px; color: #333; border-bottom: 1px dashed #e0e0e0; padding-bottom: 5px;">💡
+                すぐ切れる調味料をチェック</h4>
+            <p style="line-height: 1.6; color: #555;">
+                献立が決まったら、今すぐ必要な調味料をチェック！消費が早い生姜やにんにくチューブは、ネットでまとめ買いが便利です。
+            </p>
+            <ul style="list-style-type: disc; padding-left: 20px; margin-top: 10px; color: #007bff;">
+                <li style="margin-bottom: 8px;">
+                    <a href=https://amzn.to/49t26mv target="_blank" rel="nofollow noopener" style="color: #007bff;">
+                        冷蔵庫に必須！おろし生姜チューブの定番
+                    </a>
+                </li>
+                <li style="margin-bottom: 8px;">
+                    <a href=https://amzn.to/47Unwrx target="_blank" rel="nofollow noopener" style="color: #007bff;">
+                        風味豊かなおろしにんにくチューブ
+                    </a>
+                </li>
+            </ul>
         </div>
         <h2>レシピの出力例</h2>
         <div style="padding: 15px; border: 1px dashed #ccc; border-radius: 8px; background-color: #f7f9fc;">
@@ -421,6 +740,89 @@
     </div>
 
     <script>
+        // Firebaseの設定情報
+        const firebaseConfig = {
+            apiKey: "AIzaSyCE6vjXLNiDqwcCQHAbYhC0I7kb0LvP0eo",
+            authDomain: "remeshi.firebaseapp.com",
+            projectId: "remeshi",
+            storageBucket: "remeshi.firebasestorage.app",
+            messagingSenderId: "955306222881",
+            appId: "1:955306222881:web:ba6e127977246174cbca60",
+            measurementId: "G-YHLB5E2CSK"
+        };
+
+        // Firebase 初期化
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ログイン処理のイベントリスナーを再設定 (既存のボタンと共有)
+        const loginHandler = () => {
+            // ★ ここに Google ログイン処理 (signInWithPopup) を記述
+            const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+            firebase.auth().signInWithPopup(googleProvider)
+                .then((result) => {
+                    // ログイン成功時、onAuthStateChanged が実行されるため、ここでは何もしなくてOK
+                    console.log("Googleログイン成功:", result.user.uid);
+                })
+                .catch((error) => {
+                    console.error("Googleログインエラー:", error.message);
+                    alert("ログインに失敗しました。時間をおいて再度お試しください。");
+                });
+        };
+
+        document.getElementById('desktop-google-login-btn').addEventListener('click', loginHandler);
+        document.getElementById('mobile-google-login-btn').addEventListener('click', loginHandler);
+
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // ハンバーガーメニューの開閉
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // ★ GoogleログインボタンのDOM参照
+        const desktopLoginBtn = document.getElementById('desktop-google-login-btn');
+        const mobileLoginBtn = document.getElementById('mobile-google-login-btn');
+        const authDesktopContainer = document.getElementById('auth-desktop');
+        const authMobileContainer = document.getElementById('auth-mobile');
+
+        // ログイン状態を監視し、ヘッダーの表示を切り替える
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // --- ログイン済み ---
+                const displayName = user.displayName || 'ユーザー';
+                const logoutButtonHTML = `<button id="logout-btn" style="padding: 8px 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">ログアウト</button>`;
+
+                // PC
+                authDesktopContainer.innerHTML = `<span style="margin-right: 10px;">${displayName}さん</span>${logoutButtonHTML}`;
+                // モバイル
+                authMobileContainer.innerHTML = `<span style="display: block; margin-bottom: 5px;">${displayName}さんとしてログイン中</span>${logoutButtonHTML}`;
+
+                // ログアウト処理のイベントリスナー（ボタンがDOMに追加された後に設定）
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    firebase.auth().signOut().then(() => {
+                        alert("ログアウトしました。");
+                        // ページリロードやリダイレクトで表示をリセットするのが確実
+                    });
+                });
+
+            } else {
+                // --- 未ログイン ---
+                // ログインボタンを元のHTMLに戻す
+                authDesktopContainer.innerHTML = desktopLoginBtn.outerHTML;
+                authMobileContainer.innerHTML = mobileLoginBtn.outerHTML;
+
+                // ログイン処理のイベントリスナーを再設定 (既存のボタンと共有)
+                const loginHandler = () => {
+                    // ここに Google ログイン処理 (signInWithPopup) を記述
+                };
+                document.getElementById('desktop-google-login-btn').addEventListener('click', loginHandler);
+                document.getElementById('mobile-google-login-btn').addEventListener('click', loginHandler);
+            }
+        });
         const form = document.getElementById('menu-form');
         const input = document.getElementById('ingredients');
         const resultDisplay = document.getElementById('result-display');
@@ -510,6 +912,34 @@
 
                     resultDisplay.scrollTop = resultDisplay.scrollHeight;
                 }
+                // レシピ保存ボタンの処理
+                const favoriteBtn = document.getElementById('favorite-btn');
+                const db = firebase.firestore(); // Firestoreインスタンスの取得
+
+                // レシピをFirestoreに保存する関数
+                async function saveRecipe(userId, recipeContent) {
+                    try {
+                        // 'favorites' コレクションが存在しない場合、自動で作成されます
+                        await db.collection("favorites").add({
+                            userId: userId, // どのユーザーのレシピか
+                            recipeTitle: recipeContent.substring(0, 50), // レシピのタイトルを抜粋
+                            recipeContent: recipeContent, // レシピの全文 (Markdown)
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        alert('レシピをお気に入りに保存しました！');
+                    } catch (e) {
+                        console.error("Error saving document: ", e);
+                        alert('保存に失敗しました。認証を確認してください。');
+                    }
+                }
+                if (fullMarkdown) {
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        favoriteBtn.style.display = 'block';
+                        // クリック時に保存関数を実行
+                        favoriteBtn.onclick = () => saveRecipe(user.uid, fullMarkdown);
+                    }
+                }
                 // 広告再表示処理
                 if (adContainer1) {
                     adContainer1.style.display = 'block';
@@ -521,6 +951,83 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = '献立を考えてもらう';
             }
+        });
+        const showFavoritesBtn = document.getElementById('show-favorites-btn');
+        const favoritesList = document.getElementById('favorites-list');
+
+        // お気に入り一覧を取得・表示する関数
+        async function displayFavorites() {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                favoritesList.innerHTML = '<p>ログインが必要です。</p>';
+                return;
+            }
+
+            favoritesList.innerHTML = '<p>お気に入りデータを読み込み中...</p>';
+
+            try {
+                // 現在のユーザーIDに一致するドキュメントを検索
+                const snapshot = await db.collection("favorites")
+                    .where("userId", "==", user.uid)
+                    .orderBy("createdAt", "desc") // 新しい順に並び替え
+                    .get();
+
+                if (snapshot.empty) {
+                    favoritesList.innerHTML = '<p>まだお気に入りのレシピはありません。</p>';
+                    return;
+                }
+
+                let htmlContent = '<h3>保存済みレシピ一覧</h3><ul>';
+
+                snapshot.forEach(doc => {
+                    const recipeData = doc.data();
+                    const date = recipeData.createdAt ? recipeData.createdAt.toDate().toLocaleDateString() : '日時不明';
+
+                    // 簡易的にタイトルと日付を表示
+                    htmlContent += `
+                <li>
+                    <strong>${recipeData.recipeTitle || 'タイトルなし'}</strong> (${date})
+                    <button onclick="showFullRecipe('${doc.id}')" style="margin-left: 10px;">詳細表示</button>
+                </li>
+            `;
+                });
+                htmlContent += '</ul>';
+                favoritesList.innerHTML = htmlContent;
+
+            } catch (e) {
+                console.error("お気に入り取得エラー:", e);
+                favoritesList.innerHTML = `<p>お気に入りデータの取得に失敗しました: ${e.message}</p>`;
+            }
+        }
+
+        // 詳細表示（AI結果エリアに再表示）
+        async function showFullRecipe(docId) {
+            const doc = await db.collection("favorites").doc(docId).get();
+            if (doc.exists) {
+                const recipeContent = doc.data().recipeContent;
+                // AIの提案エリア（#result-display）にMarkdown形式で表示
+                resultDisplay.innerHTML = marked.parse(recipeContent);
+                resultDisplay.scrollIntoView({ behavior: 'smooth' }); // スクロールして結果を見せる
+            } else {
+                alert("レシピが見つかりませんでした。");
+            }
+        }
+        // 「お気に入り一覧を見る」ボタンにイベントを設定
+        showFavoritesBtn.addEventListener('click', displayFavorites);
+        // Googleログイン処理
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        document.getElementById('google-login-btn').addEventListener('click', () => {
+            firebase.auth().signInWithPopup(googleProvider)
+                .then((result) => {
+                    const user = result.user;
+                    alert(`ログイン成功！ようこそ、${user.displayName}さん`);
+                    // レシピ保存機能などを有効にする処理
+                })
+                .catch((error) => {
+                    console.error("Googleログインエラー:", error);
+                    alert("ログインに失敗しました。");
+                });
         });
     </script>
     <footer
