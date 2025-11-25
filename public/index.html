@@ -739,7 +739,6 @@
             </ol>
         </div>
     </div>
-
     <script>
         // Firebaseの設定情報
         const firebaseConfig = {
@@ -757,218 +756,107 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ログイン処理のイベントリスナーを再設定 (既存のボタンと共有)
-        const loginHandler = () => {
-            // ★ ここに Google ログイン処理 (signInWithPopup) を記述
-            const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-            firebase.auth().signInWithPopup(googleProvider)
-                .then((result) => {
-                    // ログイン成功時、onAuthStateChanged が実行されるため、ここでは何もしなくてOK
-                    console.log("Googleログイン成功:", result.user.uid);
-                })
-                .catch((error) => {
-                    console.error("Googleログインエラー:", error.message);
-                    alert("ログインに失敗しました。時間をおいて再度お試しください。");
-                });
-        };
-
-        document.getElementById('desktop-google-login-btn').addEventListener('click', loginHandler);
-        document.getElementById('mobile-google-login-btn').addEventListener('click', loginHandler);
-
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        // ハンバーガーメニューの開閉
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // ★ GoogleログインボタンのDOM参照
-        const desktopLoginBtn = document.getElementById('desktop-google-login-btn');
-        const mobileLoginBtn = document.getElementById('mobile-google-login-btn');
-        const authDesktopContainer = document.getElementById('auth-desktop');
-        const authMobileContainer = document.getElementById('auth-mobile');
-
-        // ログイン状態を監視し、ヘッダーの表示を切り替える
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                // --- ログイン済み ---
-                const displayName = user.displayName || 'ユーザー';
-                const logoutButtonHTML = `<button id="logout-btn" style="padding: 8px 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">ログアウト</button>`;
-
-                // PC
-                authDesktopContainer.innerHTML = `<span style="margin-right: 10px;">${displayName}さん</span>${logoutButtonHTML}`;
-                // モバイル
-                authMobileContainer.innerHTML = `<span style="display: block; margin-bottom: 5px;">${displayName}さんとしてログイン中</span>${logoutButtonHTML}`;
-
-                // ログアウト処理本体
-                const handleLogout = () => {
-                    firebase.auth().signOut().then(() => {
-                        alert("ログアウトしました。");
-                        // ログアウト後の画面状態は onAuthStateChanged の else ブロックが自動で処理します。
-                    }).catch((error) => {
-                        console.error("ログアウトエラー:", error);
-                    });
-                };
-
-                // DOM書き換え直後に、新しいボタン要素を取得してリスナーを設定
-
-                // PC版のボタン
-                const desktopLogoutBtn = authDesktopContainer.querySelector('#logout-btn');
-                if (desktopLogoutBtn) {
-                    desktopLogoutBtn.addEventListener('click', handleLogout);
-                }
-
-                // モバイル版のボタン
-                const mobileLogoutBtn = authMobileContainer.querySelector('#logout-btn');
-                if (mobileLogoutBtn) {
-                    mobileLogoutBtn.addEventListener('click', handleLogout);
-                }
-
-            } else {
-                // --- 未ログイン ---
-                // ログインボタンを元のHTMLに戻す
-                authDesktopContainer.innerHTML = desktopLoginBtn.outerHTML;
-                authMobileContainer.innerHTML = mobileLoginBtn.outerHTML;
-                // 再度イベントリスナーを設定
-                document.getElementById('desktop-google-login-btn').addEventListener('click', loginHandler);
-                document.getElementById('mobile-google-login-btn').addEventListener('click', loginHandler);
-            }
-        });
+        // --- グローバル変数 ---
         const form = document.getElementById('menu-form');
         const input = document.getElementById('ingredients');
         const resultDisplay = document.getElementById('result-display');
         const submitBtn = document.getElementById('submit-btn');
         const adContainer1 = document.getElementById('ad-container-1');
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const showFavoritesBtn = document.getElementById('show-favorites-btn');
+        const favoritesList = document.getElementById('favorites-list');
 
-        // チェックボックス要素の参照を定義
+        // 選択肢要素
         const onlyInputCheckbox = document.getElementById('onlyInputIngredients');
         const isDietCheckbox = document.getElementById('isDietMenu');
-
-        // セレクトボックス要素の参照を定義
         const dishCountSelect = document.getElementById('dish-count');
         const dishTypeSelect = document.getElementById('dish-type');
         const dishGenreSelect = document.getElementById('dish-genre');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // ボタンクリック時に最新の値を要素から直接取得。
-            const ingredientsValue = input.value;
-            const onlyInputChecked = onlyInputCheckbox.checked;
-            const isDietChecked = isDietCheckbox.checked;
-            const dishCount = dishCountSelect.value;
-            const dishType = dishTypeSelect.value;
-            const dishGenre = dishGenreSelect.value;
-
-            if (!ingredientsValue) {
-                resultDisplay.textContent = '食材を入力してください。';
-                return;
-            }
-            // 広告非表示処理
-            if (adContainer1) {
-                adContainer1.style.display = 'none';
-            }
-            // ローディング処理
-            submitBtn.disabled = true;
-            submitBtn.textContent = '考え中... 🧠';
-            resultDisplay.textContent = 'AIが献立を考えています...';
-
-            const requestBody = {
-                ingredients: ingredientsValue,
-                onlyInputIngredients: onlyInputChecked,
-                isDietMenu: isDietChecked,
-                dishCount: dishCount,
-                dishType: dishType,
-                dishGenre: dishGenre
-            };
-
-            try {
-                const functionUrl = 'https://us-central1-remeshi.cloudfunctions.net/suggestMenu';
-
-                const response = await fetch(functionUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+        // -------------------------------------------------
+        // ★ 1. 認証関連の処理 (ログイン/ログアウト)
+        // -------------------------------------------------
+        const loginHandler = () => {
+            const googleProvider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(googleProvider)
+                .then((result) => {
+                    console.log("Googleログイン成功:", result.user.uid);
+                })
+                .catch((error) => {
+                    console.error("Googleログインエラー:", error.message);
+                    alert("ログインに失敗しました。");
                 });
+        };
 
-                if (!response.ok) {
-                    // エラー応答を処理し、エラーメッセージを取得する
-                    const errorText = await response.text();
-                    let errorMessage = `Functions Error: ${response.status} - ${response.statusText}`;
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        errorMessage = errorJson.error || errorMessage;
-                    } catch (e) {
-                        // JSONパース失敗時はそのままのテキストを使う
-                    }
-                    throw new Error(errorMessage);
-                }
+        // ボタンへのイベント設定
+        const desktopLoginBtn = document.getElementById('desktop-google-login-btn');
+        const mobileLoginBtn = document.getElementById('mobile-google-login-btn');
 
-                // ストリーミング処理の開始
-                resultDisplay.textContent = '';
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let fullMarkdown = '';
+        if (desktopLoginBtn) desktopLoginBtn.addEventListener('click', loginHandler);
+        if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', loginHandler);
 
-                while (true) {
-                    const { done, value } = await reader.read();
+        // ハンバーガーメニュー
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        });
 
-                    if (done) {
-                        break;
-                    }
+        // 認証状態の監視
+        firebase.auth().onAuthStateChanged((user) => {
+            const authDesktopContainer = document.getElementById('auth-desktop');
+            const authMobileContainer = document.getElementById('auth-mobile');
 
-                    const chunk = decoder.decode(value, { stream: true });
-                    fullMarkdown += chunk;
-                    resultDisplay.innerHTML = marked.parse(fullMarkdown);
+            if (user) {
+                // ログイン時
+                const displayName = user.displayName || 'ユーザー';
+                const logoutButtonHTML = `<button id="logout-btn" style="padding: 8px 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">ログアウト</button>`;
 
-                    resultDisplay.scrollTop = resultDisplay.scrollHeight;
-                }
-                // レシピ保存ボタンの処理
-                const favoriteBtn = document.getElementById('favorite-btn');
-                const db = firebase.firestore(); // Firestoreインスタンスの取得
+                authDesktopContainer.innerHTML = `<span style="margin-right: 10px;">${displayName}さん</span>${logoutButtonHTML}`;
+                authMobileContainer.innerHTML = `<span style="display: block; margin-bottom: 5px;">${displayName}さんとしてログイン中</span>${logoutButtonHTML}`;
 
-                // レシピをFirestoreに保存する関数
-                async function saveRecipe(userId, recipeContent) {
-                    try {
-                        // 'favorites' コレクションが存在しない場合、自動で作成されます
-                        await db.collection("favorites").add({
-                            userId: userId, // どのユーザーのレシピか
-                            recipeTitle: recipeContent.substring(0, 50), // レシピのタイトルを抜粋
-                            recipeContent: recipeContent, // レシピの全文 (Markdown)
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        alert('レシピをお気に入りに保存しました！');
-                    } catch (e) {
-                        console.error("Error saving document: ", e);
-                        alert('保存に失敗しました。認証を確認してください。');
-                    }
-                }
-                if (fullMarkdown) {
-                    const user = firebase.auth().currentUser;
-                    if (user) {
-                        favoriteBtn.style.display = 'block';
-                        // クリック時に保存関数を実行
-                        favoriteBtn.onclick = () => saveRecipe(user.uid, fullMarkdown);
-                    }
-                }
-                // 広告再表示処理
-                if (adContainer1) {
-                    adContainer1.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('エラー:', error);
-                resultDisplay.textContent = `エラーが発生しました。詳細: ${error.message}`;
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '献立を考えてもらう';
+                // ログアウト処理
+                const handleLogout = () => {
+                    firebase.auth().signOut().then(() => {
+                        alert("ログアウトしました。");
+                        favoritesList.innerHTML = ''; // 表示をクリア
+                        favoriteBtn.style.display = 'none'; // 保存ボタンを隠す
+                    });
+                };
+
+                // ログアウトボタンへのイベント設定
+                authDesktopContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+                authMobileContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+
+            } else {
+                // 未ログイン時（ボタンを元に戻す）
+                // ※ここでHTMLを書き換えるとイベントが消えるため、リロードを促すか、HTML構造を維持するのが安全ですが
+                // 簡易的にリロードで対応するか、以前のHTML文字列を再セットします。
+                location.reload(); // 最も確実に状態をリセットするためリロード推奨
             }
         });
-        const showFavoritesBtn = document.getElementById('show-favorites-btn');
-        const favoritesList = document.getElementById('favorites-list');
 
-        // お気に入り一覧を取得・表示する関数
+        // -------------------------------------------------
+        // ★ 2. Firestore 関連の処理 (保存/取得/表示)
+        // -------------------------------------------------
+
+        // ▼ レシピを保存する関数 (グローバルに移動)
+        async function saveRecipe(userId, recipeContent) {
+            try {
+                // 'favorites' コレクションに保存
+                await db.collection("favorites").add({
+                    userId: userId, // 検索用ID
+                    recipeTitle: recipeContent.substring(0, 50) + "...", // タイトル（簡易）
+                    recipeContent: recipeContent,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('レシピをお気に入りに保存しました！');
+            } catch (e) {
+                console.error("Error saving document: ", e);
+                alert('保存に失敗しました。: ' + e.message);
+            }
+        }
+
+        // ▼ お気に入り一覧を表示する関数
         async function displayFavorites() {
             const user = firebase.auth().currentUser;
             if (!user) {
@@ -976,57 +864,130 @@
                 return;
             }
 
-            favoritesList.innerHTML = '<p>お気に入りデータを読み込み中...</p>';
+            favoritesList.innerHTML = '<p>読み込み中...</p>';
 
             try {
-                // 現在のユーザーIDに一致するドキュメントを検索
+                // userId でフィルタリングして取得
                 const snapshot = await db.collection("favorites")
                     .where("userId", "==", user.uid)
-                    .orderBy("createdAt", "desc") // 新しい順に並び替え
+                    .orderBy("createdAt", "desc")
                     .get();
 
                 if (snapshot.empty) {
-                    favoritesList.innerHTML = '<p>まだお気に入りのレシピはありません。</p>';
+                    favoritesList.innerHTML = '<p>お気に入りのレシピはありません。</p>';
                     return;
                 }
 
-                let htmlContent = '<h3>保存済みレシピ一覧</h3><ul>';
-
+                let htmlContent = '<h3>保存済みレシピ一覧</h3><ul style="padding-left: 20px;">';
                 snapshot.forEach(doc => {
-                    const recipeData = doc.data();
-                    const date = recipeData.createdAt ? recipeData.createdAt.toDate().toLocaleDateString() : '日時不明';
-
-                    // 簡易的にタイトルと日付を表示
+                    const data = doc.data();
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : '';
                     htmlContent += `
-                <li>
-                    <strong>${recipeData.recipeTitle || 'タイトルなし'}</strong> (${date})
-                    <button onclick="showFullRecipe('${doc.id}')" style="margin-left: 10px;">詳細表示</button>
-                </li>
-            `;
+                    <li style="margin-bottom: 10px;">
+                        <strong>${data.recipeTitle}</strong> (${date})
+                        <button onclick="showFullRecipe('${doc.id}')" style="margin-left: 10px; cursor:pointer;">詳細表示</button>
+                    </li>`;
                 });
                 htmlContent += '</ul>';
                 favoritesList.innerHTML = htmlContent;
 
             } catch (e) {
-                console.error("お気に入り取得エラー:", e);
-                favoritesList.innerHTML = `<p>お気に入りデータの取得に失敗しました: ${e.message}</p>`;
+                console.error("取得エラー:", e);
+                // インデックスが必要な場合のエラーメッセージを表示
+                if (e.message.includes("index")) {
+                    console.log("★コンソールのリンクをクリックしてインデックスを作成してください★");
+                }
+                favoritesList.innerHTML = `<p>取得エラー: ${e.message}</p>`;
             }
         }
 
-        // 詳細表示（AI結果エリアに再表示）
+        // ▼ 詳細を表示する関数 (グローバル)
         async function showFullRecipe(docId) {
             const doc = await db.collection("favorites").doc(docId).get();
             if (doc.exists) {
-                const recipeContent = doc.data().recipeContent;
-                // AIの提案エリア（#result-display）にMarkdown形式で表示
-                resultDisplay.innerHTML = marked.parse(recipeContent);
-                resultDisplay.scrollIntoView({ behavior: 'smooth' }); // スクロールして結果を見せる
+                resultDisplay.innerHTML = marked.parse(doc.data().recipeContent);
+                resultDisplay.scrollIntoView({ behavior: 'smooth' });
             } else {
-                alert("レシピが見つかりませんでした。");
+                alert("データが見つかりません。");
             }
         }
-        // 「お気に入り一覧を見る」ボタンにイベントを設定
+
+        // 一覧ボタンのイベント
         showFavoritesBtn.addEventListener('click', displayFavorites);
+
+
+        // -------------------------------------------------
+        // ★ 3. 献立作成 (API呼び出し) の処理
+        // -------------------------------------------------
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 値の取得
+            const ingredientsValue = input.value;
+            if (!ingredientsValue) {
+                resultDisplay.textContent = '食材を入力してください。';
+                return;
+            }
+
+            // UI制御
+            if (adContainer1) adContainer1.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '考え中... 🧠';
+            resultDisplay.textContent = 'AIが献立を考えています...';
+            favoriteBtn.style.display = 'none'; // 新しい提案中は保存ボタンを隠す
+
+            const requestBody = {
+                ingredients: ingredientsValue,
+                onlyInputIngredients: onlyInputCheckbox.checked,
+                isDietMenu: isDietCheckbox.checked,
+                dishCount: dishCountSelect.value,
+                dishType: dishTypeSelect.value,
+                dishGenre: dishGenreSelect.value
+            };
+
+            let fullMarkdown = '';
+
+            try {
+                const functionUrl = 'https://us-central1-remeshi.cloudfunctions.net/suggestMenu';
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+                // ストリーミング処理
+                resultDisplay.textContent = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    fullMarkdown += decoder.decode(value, { stream: true });
+                    resultDisplay.innerHTML = marked.parse(fullMarkdown);
+                    resultDisplay.scrollTop = resultDisplay.scrollHeight;
+                }
+
+                // ★ 完了後の処理: 保存ボタンの表示
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    favoriteBtn.style.display = 'block';
+                    // イベントリスナーの重複登録を防ぐため、onclickプロパティを使用
+                    favoriteBtn.onclick = () => saveRecipe(user.uid, fullMarkdown);
+                }
+
+                if (adContainer1) adContainer1.style.display = 'block';
+
+            } catch (error) {
+                console.error('エラー:', error);
+                resultDisplay.textContent = `エラーが発生しました: ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '献立を考えてもらう';
+            }
+        });
     </script>
     <footer
         style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
