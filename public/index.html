@@ -828,10 +828,20 @@
                 authMobileContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
 
             } else {
-                // 未ログイン時（ボタンを元に戻す）
-                // ※ここでHTMLを書き換えるとイベントが消えるため、リロードを促すか、HTML構造を維持するのが安全ですが
-                // 簡易的にリロードで対応するか、以前のHTML文字列を再セットします。
-                location.reload(); // 最も確実に状態をリセットするためリロード推奨
+                // 未ログイン時（ボタンを元のHTMLに戻し、イベントリスナーを再設定する）
+                const desktopLoginBtn = document.getElementById('desktop-google-login-btn');
+                const mobileLoginBtn = document.getElementById('mobile-google-login-btn');
+
+                // ログインボタンのHTMLを再セット（innerHTMLにouterHTMLを渡す）
+                authDesktopContainer.innerHTML = desktopLoginBtn ? desktopLoginBtn.outerHTML : '';
+                authMobileContainer.innerHTML = mobileLoginBtn ? mobileLoginBtn.outerHTML : '';
+
+                // 再度イベントリスナーを設定
+                const newDesktopBtn = document.getElementById('desktop-google-login-btn');
+                const newMobileBtn = document.getElementById('mobile-google-login-btn');
+
+                if (newDesktopBtn) newDesktopBtn.addEventListener('click', loginHandler);
+                if (newMobileBtn) newMobileBtn.addEventListener('click', loginHandler);
             }
         });
 
