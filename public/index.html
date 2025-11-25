@@ -121,6 +121,7 @@
             background-color: #f4f7f6;
             margin: 0;
             padding: 20px;
+            padding-top: 60px;
         }
 
         .container {
@@ -814,11 +815,7 @@
                 // ログインボタンを元のHTMLに戻す
                 authDesktopContainer.innerHTML = desktopLoginBtn.outerHTML;
                 authMobileContainer.innerHTML = mobileLoginBtn.outerHTML;
-
-                // ログイン処理のイベントリスナーを再設定 (既存のボタンと共有)
-                const loginHandler = () => {
-                    // ここに Google ログイン処理 (signInWithPopup) を記述
-                };
+                // 再度イベントリスナーを設定
                 document.getElementById('desktop-google-login-btn').addEventListener('click', loginHandler);
                 document.getElementById('mobile-google-login-btn').addEventListener('click', loginHandler);
             }
@@ -1014,21 +1011,6 @@
         }
         // 「お気に入り一覧を見る」ボタンにイベントを設定
         showFavoritesBtn.addEventListener('click', displayFavorites);
-        // Googleログイン処理
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-        document.getElementById('google-login-btn').addEventListener('click', () => {
-            firebase.auth().signInWithPopup(googleProvider)
-                .then((result) => {
-                    const user = result.user;
-                    alert(`ログイン成功！ようこそ、${user.displayName}さん`);
-                    // レシピ保存機能などを有効にする処理
-                })
-                .catch((error) => {
-                    console.error("Googleログインエラー:", error);
-                    alert("ログインに失敗しました。");
-                });
-        });
     </script>
     <footer
         style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f4f7f6; font-size: 0.9em;">
