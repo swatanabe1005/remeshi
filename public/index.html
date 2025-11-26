@@ -773,9 +773,7 @@
         const dishTypeSelect = document.getElementById('dish-type');
         const dishGenreSelect = document.getElementById('dish-genre');
 
-        const initialDesktopBtnHTML = authDesktopContainer.innerHTML;
-        const initialMobileBtnHTML = authMobileContainer.innerHTML;
-
+        
         // -------------------------------------------------
         // ★ 1. 認証関連の処理 (ログイン/ログアウト)
         // -------------------------------------------------
@@ -797,18 +795,21 @@
 
         if (desktopLoginBtn) desktopLoginBtn.addEventListener('click', loginHandler);
         if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', loginHandler);
-
+        
         // ハンバーガーメニュー
         document.getElementById('hamburger-btn').addEventListener('click', () => {
             const menu = document.getElementById('mobile-menu');
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         });
-
+        
         // 認証状態の監視
         firebase.auth().onAuthStateChanged((user) => {
             const authDesktopContainer = document.getElementById('auth-desktop');
             const authMobileContainer = document.getElementById('auth-mobile');
-
+            
+            const initialDesktopBtnHTML = authDesktopContainer.innerHTML;
+            const initialMobileBtnHTML = authMobileContainer.innerHTML;
+            
             if (user) {
                 // ログイン時
                 const displayName = user.displayName || 'ユーザー';
