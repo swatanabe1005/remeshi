@@ -41,7 +41,7 @@ export const suggestMenu = https.onRequest({
     return response.end(JSON.stringify({ error: "食材名（ingredients）が必要です。" }));
   }
 
-  let basePrompt = "以下の食材を最大限に活用した献立とレシピを提案してください。以降で制約が指定されていない場合、品数は1品とします。";
+  let basePrompt = "以下の食材を最大限に活用した献立とレシピを提案してください。以降で制約が指定されていない場合、品数は1品、使用可能な食材以外も使用可能です。";
   let constraint = "";
 
   // 1. チェックボックスの制約
