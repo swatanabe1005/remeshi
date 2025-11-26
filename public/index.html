@@ -773,6 +773,9 @@
         const dishTypeSelect = document.getElementById('dish-type');
         const dishGenreSelect = document.getElementById('dish-genre');
 
+        const initialDesktopBtnHTML = authDesktopContainer.innerHTML;
+        const initialMobileBtnHTML = authMobileContainer.innerHTML;
+
         // -------------------------------------------------
         // ★ 1. 認証関連の処理 (ログイン/ログアウト)
         // -------------------------------------------------
@@ -828,13 +831,12 @@
                 authMobileContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
 
             } else {
+                // ログインボタンのHTMLを再セット
+                authDesktopContainer.innerHTML = initialDesktopBtnHTML;
+                authMobileContainer.innerHTML = initialMobileBtnHTML;
                 // 未ログイン時（ボタンを元のHTMLに戻し、イベントリスナーを再設定する）
                 const desktopLoginBtn = document.getElementById('desktop-google-login-btn');
                 const mobileLoginBtn = document.getElementById('mobile-google-login-btn');
-
-                // ログインボタンのHTMLを再セット（innerHTMLにouterHTMLを渡す）
-                authDesktopContainer.innerHTML = desktopLoginBtn ? desktopLoginBtn.outerHTML : '';
-                authMobileContainer.innerHTML = mobileLoginBtn ? mobileLoginBtn.outerHTML : '';
 
                 // 再度イベントリスナーを設定
                 const newDesktopBtn = document.getElementById('desktop-google-login-btn');
