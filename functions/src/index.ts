@@ -41,7 +41,7 @@ export const suggestMenu = https.onRequest({
     return response.end(JSON.stringify({ error: "食材名（ingredients）が必要です。" }));
   }
 
-  let basePrompt = "以下の食材を最大限に活用した献立とレシピを提案してください。";
+  let basePrompt = "以下の食材を最大限に活用した献立とレシピを提案してください。以降で制約が指定されていない場合、品数は1品とします。";
   let constraint = "";
 
   // 1. チェックボックスの制約
@@ -67,7 +67,7 @@ export const suggestMenu = https.onRequest({
   // ★
 
   // 出力形式の指示 (Markdown)
-  const detailPrompt = "出力形式は以下のような形式としてください。見出しは大きく、材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
+  const detailPrompt = "出力形式は以下のような形式としてください。料理名を一番最初に出力。見出しは大きく、材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
 
   const prompt =
     `${basePrompt}\n` +
