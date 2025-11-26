@@ -375,6 +375,96 @@
             background-color: #303030;
             opacity: 8%;
         }
+
+        /* --- お気に入りリストのスタイル --- */
+        #favorites-list ul {
+            list-style-type: none;
+            /* ・を消す */
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            /* カード間の隙間 */
+        }
+
+        .recipe-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            /* 角丸 */
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-3px);
+            /* ホバー時に少し浮く */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #007bff;
+        }
+
+        .recipe-info {
+            flex: 1;
+            /* 左側のスペースを埋める */
+            padding-right: 15px;
+        }
+
+        .recipe-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 5px 0;
+            display: block;
+        }
+
+        .recipe-date {
+            font-size: 0.85rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .view-detail-btn {
+            background-color: #eef6ff;
+            /* 薄い青背景 */
+            color: #007bff;
+            border: 1px solid #007bff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            /* 丸いボタン */
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            /* ボタン内改行禁止 */
+        }
+
+        .view-detail-btn:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* スマホ対応: 画面が狭いときは縦並びにする */
+        @media (max-width: 480px) {
+            .recipe-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .view-detail-btn {
+                width: 100%;
+                /* ボタンを横幅いっぱいに */
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -776,7 +866,7 @@
         // --- DOM要素の取得 ---
         const authDesktopContainer = document.getElementById('auth-desktop');
         const authMobileContainer = document.getElementById('auth-mobile');
-        
+
         // 初期のログインボタンHTMLを保存
         const initialDesktopBtnHTML = authDesktopContainer.innerHTML;
         const initialMobileBtnHTML = authMobileContainer.innerHTML;
@@ -875,44 +965,56 @@
         async function displayFavorites() {
             const user = firebase.auth().currentUser;
             if (!user) {
-                favoritesList.innerHTML = '<p>ログインが必要です。</p>';
+                favoritesList.innerHTML = '<div style="text-align:center; padding:20px; color:#777;">ログインするとお気に入りを表示できます。</div>';
                 return;
             }
 
-            favoritesList.innerHTML = '<p>読み込み中...</p>';
+            favoritesList.innerHTML = '<div style="text-align:center; padding:20px;"><span class="loader"></span> 読み込み中...</div>';
 
             try {
-                // userId でフィルタリングして取得
                 const snapshot = await db.collection("favorites")
                     .where("userId", "==", user.uid)
                     .orderBy("createdAt", "desc")
                     .get();
 
                 if (snapshot.empty) {
-                    favoritesList.innerHTML = '<p>お気に入りのレシピはありません。</p>';
+                    favoritesList.innerHTML = '<div style="text-align:center; padding:20px; background:#f9f9f9; border-radius:8px;">まだお気に入りのレシピはありません。<br>AIが提案したレシピを保存してみましょう！🍳</div>';
                     return;
                 }
 
-                let htmlContent = '<h3>保存済みレシピ一覧</h3><ul style="padding-left: 20px;">';
+                let htmlContent = '<ul>';
+
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : '';
+                    // 日付のフォーマット整形
+                    let dateStr = '日時不明';
+                    if (data.createdAt) {
+                        const d = data.createdAt.toDate();
+                        dateStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    }
+
+                    // タイトルが長すぎる場合に省略する処理（必要であれば）
+                    const title = data.recipeTitle || 'タイトルなし';
+
+                    // カードHTMLの生成
                     htmlContent += `
-                    <li style="margin-bottom: 10px;">
-                        <strong>${data.recipeTitle}</strong> (${date})
-                        <button onclick="showFullRecipe('${doc.id}')" style="margin-left: 10px; cursor:pointer;">詳細表示</button>
+                    <li class="recipe-card">
+                        <div class="recipe-info">
+                            <div class="recipe-title">🍳 ${title}</div>
+                            <div class="recipe-date">📅 ${dateStr}</div>
+                        </div>
+                        <button class="view-detail-btn" onclick="showFullRecipe('${doc.id}')">
+                            レシピを見る
+                        </button>
                     </li>`;
                 });
+
                 htmlContent += '</ul>';
                 favoritesList.innerHTML = htmlContent;
 
             } catch (e) {
                 console.error("取得エラー:", e);
-                // インデックスが必要な場合のエラーメッセージを表示
-                if (e.message.includes("index")) {
-                    console.log("★コンソールのリンクをクリックしてインデックスを作成してください★");
-                }
-                favoritesList.innerHTML = `<p>取得エラー: ${e.message}</p>`;
+                favoritesList.innerHTML = `<p style="color:red;">データ取得エラー: ${e.message}</p>`;
             }
         }
 
