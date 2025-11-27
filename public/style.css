@@ -1,0 +1,432 @@
+/* --- ヘッダーの基本スタイル --- */
+.main-header {
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    /* 画面上部に固定 */
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* --- モバイルメニュー/ハンバーガーメニュー --- */
+
+/* デフォルトではPCのナビゲーションを表示し、ハンバーガーを非表示 */
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #333;
+}
+
+.mobile-menu {
+    display: none;
+    /* 初期状態では非表示 */
+    background-color: #f8f8f8;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+    padding: 10px 0;
+    z-index: 999;
+}
+
+.mobile-menu .auth-info,
+.mobile-menu a {
+    display: block;
+    padding: 12px 20px;
+    text-align: center;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+/* --- レスポンシブ対応 (600px以下でモバイルレイアウトに切り替え) --- */
+@media (max-width: 600px) {
+
+    /* PC用ナビゲーションを非表示 */
+    .nav-links {
+        display: none;
+    }
+
+    /* ハンバーガーメニューを表示 */
+    .hamburger-menu {
+        display: block;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    padding-top: 60px;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 0;
+}
+
+#menu-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#ingredients,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    /* paddingを含めて幅を100%に */
+}
+
+#submit-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#submit-btn:hover {
+    background-color: #0056b3;
+}
+
+#submit-btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+h2 {
+    margin-top: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+#result-display h1 {
+    color: #333;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-top: 25px;
+}
+
+#result-display h2 {
+    color: #007bff;
+    font-size: 1.4rem;
+    margin-top: 20px;
+}
+
+#result-display h3 {
+    /* AI出力内の小見出しに適用 */
+    color: #007bff;
+    /* メインカラーと合わせる */
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 3px;
+    margin-top: 25px;
+}
+
+#result-display ul {
+    list-style-type: square;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+#result-display li {
+    margin-bottom: 5px;
+}
+
+/* レシピタイトル全体 (Markdownの # に対応) */
+#result-display h1 {
+    color: #333;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-top: 25px;
+}
+
+/* 材料・作り方のセクションタイトル (Markdownの ## に対応) */
+#result-display h2 {
+    color: #007bff;
+    /* メインカラーを使用 */
+    font-size: 1.4rem;
+    border-bottom: 1px dashed #eee;
+    /* 実線から破線に変更 */
+    padding-bottom: 3px;
+    margin-top: 20px;
+    /* 上部のスペースを確保 */
+    margin-bottom: 10px;
+    /* 下部のスペースを確保 */
+}
+
+/* リストアイテム全体（材料のリストなど） */
+#result-display ul {
+    list-style-type: square;
+    /* リストの記号を四角に */
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+#result-display li {
+    margin-bottom: 5px;
+}
+
+/* 作り方（Markdownの 1. 2. 3. に対応） */
+#result-display ol {
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+#result-display ol li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Googleアイコンのスタイル */
+.gsi-material-button {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-appearance: none;
+    background-color: WHITE;
+    background-image: none;
+    border: 1px solid #747775;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #1f1f1f;
+    cursor: pointer;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 14px;
+    height: 40px;
+    letter-spacing: 0.25px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 12px;
+    position: relative;
+    text-align: center;
+    -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+    max-width: 400px;
+    min-width: min-content;
+    margin: 0 auto;
+}
+
+.gsi-material-button .gsi-material-button-icon {
+    height: 20px;
+    margin-right: 12px;
+    min-width: 20px;
+    width: 20px;
+}
+
+.gsi-material-button .gsi-material-button-content-wrapper {
+    -webkit-align-items: center;
+    align-items: center;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    height: 100%;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+}
+
+.gsi-material-button .gsi-material-button-contents {
+    -webkit-flex-grow: 1;
+    flex-grow: 1;
+    font-family: 'Roboto', arial, sans-serif;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+.gsi-material-button .gsi-material-button-state {
+    -webkit-transition: opacity .218s;
+    transition: opacity .218s;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.gsi-material-button:disabled {
+    cursor: default;
+    background-color: #ffffff61;
+    border-color: #1f1f1f1f;
+}
+
+.gsi-material-button:disabled .gsi-material-button-contents {
+    opacity: 38%;
+}
+
+.gsi-material-button:disabled .gsi-material-button-icon {
+    opacity: 38%;
+}
+
+.gsi-material-button:not(:disabled):active .gsi-material-button-state,
+.gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 12%;
+}
+
+.gsi-material-button:not(:disabled):hover {
+    -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+}
+
+.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 8%;
+}
+
+/* --- お気に入りリストのスタイル --- */
+#favorites-list ul {
+    list-style-type: none;
+    /* ・を消す */
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* カード間の隙間 */
+}
+
+.recipe-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    /* 角丸 */
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-card:hover {
+    transform: translateY(-3px);
+    /* ホバー時に少し浮く */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+}
+
+.recipe-info {
+    flex: 1;
+    /* 左側のスペースを埋める */
+    padding-right: 15px;
+}
+
+.recipe-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 5px 0;
+    display: block;
+}
+
+.recipe-date {
+    font-size: 0.85rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.view-detail-btn {
+    background-color: #eef6ff;
+    /* 薄い青背景 */
+    color: #007bff;
+    border: 1px solid #007bff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    /* 丸いボタン */
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    /* ボタン内改行禁止 */
+}
+
+.view-detail-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* スマホ対応: 画面が狭いときは縦並びにする */
+@media (max-width: 480px) {
+    .recipe-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .view-detail-btn {
+        width: 100%;
+        /* ボタンを横幅いっぱいに */
+        text-align: center;
+    }
+}
