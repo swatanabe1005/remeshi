@@ -166,15 +166,20 @@ async function displayFavorites() {
 
             // カードHTMLの生成
             htmlContent += `
-            <li class="recipe-card">
-                <div class="recipe-info">
-                    <div class="recipe-title">🍳 ${title}</div>
-                    <div class="recipe-date">📅 ${dateStr}</div>
-                </div>
-                <button class="view-detail-btn" onclick="showFullRecipe('${doc.id}')">
-                    レシピを見る
-                </button>
-            </li>`;
+                    <li class="recipe-card">
+                        <div class="recipe-info">
+                            <div class="recipe-title">🍳 ${title}</div>
+                            <div class="recipe-date">📅 ${dateStr}</div>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="view-detail-btn" onclick="showFullRecipe('${doc.id}')">
+                                レシピを見る
+                            </button>
+                            <button class="delete-btn" onclick="deleteRecipe('${doc.id}')">
+                                削除
+                            </button>
+                        </div>
+                    </li>`;
         });
 
         htmlContent += '</ul>';
@@ -183,6 +188,26 @@ async function displayFavorites() {
     } catch (e) {
         console.error("取得エラー:", e);
         favoritesList.innerHTML = `<p style="color:red;">データ取得エラー: ${e.message}</p>`;
+    }
+}
+
+// ▼ お気に入りレシピを削除する関数
+async function deleteRecipe(docId) {
+    if (!confirm('本当にこのレシピを削除しますか？')) {
+        return; // ユーザーがキャンセルした場合
+    }
+    try {
+        // Firestoreからドキュメントを削除
+        await db.collection("favorites").doc(docId).delete();
+
+        alert("レシピを削除しました。");
+
+        // 削除後、一覧を再表示して画面を更新
+        await displayFavorites();
+
+    } catch (e) {
+        console.error("削除エラー:", e);
+        alert(`削除に失敗しました: ${e.message}`);
     }
 }
 

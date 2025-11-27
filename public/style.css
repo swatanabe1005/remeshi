@@ -430,3 +430,28 @@ h2 {
         text-align: center;
     }
 }
+
+/* --- 削除ボタンとアクションコンテナのスタイル --- */
+.recipe-actions {
+    display: flex;
+    gap: 10px; /* 詳細ボタンと削除ボタンの間のスペース */
+    align-items: center;
+}
+
+.delete-btn {
+    background-color: transparent; /* 背景なし */
+    color: #dc3545; /* 赤色 */
+    border: 1px solid #dc3545;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545; /* ホバーで赤く塗りつぶす */
+    color: white;
+}
