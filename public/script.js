@@ -377,13 +377,7 @@ form.addEventListener('submit', async (e) => {
         // ユーザーがログインしていれば保存ボタンを表示
         if (user) {
             favoriteBtn.style.display = 'block';
-            // saveRecipe(userId, recipeTitle, recipeContent)
             favoriteBtn.onclick = () => saveRecipe(user.uid, finalTitle, fullMarkdown);
-        }
-        if (user) {
-            favoriteBtn.style.display = 'block';
-            // イベントリスナーの重複登録を防ぐため、onclickプロパティを使用
-            favoriteBtn.onclick = () => saveRecipe(user.uid, fullMarkdown);
         }
 
         if (adContainer1) adContainer1.style.display = 'block';
