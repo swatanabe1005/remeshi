@@ -334,45 +334,41 @@ form.addEventListener('submit', async (e) => {
         // ★ 完了後の処理: 保存ボタンの表示
         const user = firebase.auth().currentUser;
         let finalTitle = "";
-        const hashIndex = fullMarkdown.indexOf("#");
 
-        if (hashIndex === -1) {
-            // 条件3: "#"が見つからなければ先頭部分50文字
-            finalTitle = fullMarkdown.substring(0, 50);
-        } else {
-            // "#"が見つかった場合
-            const searchStartIndex = hashIndex + 10; // "#"から10文字目以降を検索開始位置とする
+        const titleStart = fullMarkdown.indexOf("# "); // # と半角スペース
+        const titleEnd = fullMarkdown.indexOf("##"); // 次のセクションの見出し
 
-            // 10文字目以降が存在しない（文字列が短い）場合は末尾まで対象にするためのガード
-            if (searchStartIndex >= fullMarkdown.length) {
-                finalTitle = fullMarkdown.substring(hashIndex, hashIndex + 50);
+        // 最初に "# " が見つかるかチェック
+        if (titleStart !== -1) {
+            // "# " の直後からタイトルが始まる
+            const startPos = titleStart + 2;
+
+            // タイトルが閉じる "**" の位置を探す (タイトル開始位置より後)
+            const boldEndIndex = fullMarkdown.indexOf("**", startPos);
+
+            if (boldEndIndex !== -1 && boldEndIndex > startPos) {
+                // 条件1: **タイトル** の形式の場合
+                // "# " の位置から、タイトルを閉じる "**" の直後までを抽出する
+                // 例: # **タイトル** -> 1文字目から boldEndIndex + 2 まで
+                finalTitle = fullMarkdown.substring(titleStart, boldEndIndex + 2);
+
+            } else if (titleEnd !== -1) {
+                // 条件2: 次のセクションの "##" が存在する場合
+                // "#" から "##" の直前までを抽出
+                finalTitle = fullMarkdown.substring(titleStart, titleEnd).trim();
+
             } else {
-                // 10文字目以降で最初の半角スペースを探す
-                const halfSpaceIndex = fullMarkdown.indexOf(" ", searchStartIndex);
-                // 10文字目以降で最初の全角スペースを探す
-                const fullSpaceIndex = fullMarkdown.indexOf("　", searchStartIndex);
+                // 条件3: どちらも見つからない場合、"#" から最初の改行または50文字を抽出
+                const newLineIndex = fullMarkdown.indexOf("\n", titleStart);
+                const endIndex = (newLineIndex !== -1) ? newLineIndex : fullMarkdown.length;
+                // 50文字以内を強制
+                const actualEndIndex = Math.min(endIndex, titleStart + 50);
 
-                // どちらのスペースが先に出てくるか（見つからない場合は -1）
-                let endSpaceIndex = -1;
-
-                if (halfSpaceIndex !== -1 && fullSpaceIndex !== -1) {
-                    // 両方見つかったら、手前にある方を採用
-                    endSpaceIndex = Math.min(halfSpaceIndex, fullSpaceIndex);
-                } else if (halfSpaceIndex !== -1) {
-                    endSpaceIndex = halfSpaceIndex;
-                } else if (fullSpaceIndex !== -1) {
-                    endSpaceIndex = fullSpaceIndex;
-                }
-
-                if (endSpaceIndex !== -1) {
-                    // 条件2: スペースが見つかったら、そのスペースを最後の文字とする
-                    // (substringの第2引数は「そこを含まない」ため +1 してスペースを含める)
-                    finalTitle = fullMarkdown.substring(hashIndex, endSpaceIndex + 1);
-                } else {
-                    // 条件4: スペースが見つからなければ"#"から先頭50文字
-                    finalTitle = fullMarkdown.substring(hashIndex, hashIndex + 50);
-                }
+                finalTitle = fullMarkdown.substring(titleStart, actualEndIndex).trim();
             }
+        } else {
+            // "#" が全くない場合、先頭の50文字をそのまま使用
+            finalTitle = fullMarkdown.substring(0, 50).trim();
         }
         // ユーザーがログインしていれば保存ボタンを表示
         if (user) {

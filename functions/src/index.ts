@@ -67,7 +67,7 @@ export const suggestMenu = https.onRequest({
   // ★
 
   // 出力形式の指示 (Markdown)
-  const detailPrompt = "出力形式は以下のような形式としてください。料理名を一番最初に出力。見出しは大きく、材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
+  const detailPrompt = "出力形式は以下のような形式としてください。「# **タイトル名** 説明文...」の形式で出力を開始。材料名もわかりやすく出力してください。材料\n材料名1　250g\n材料名2　1/2個\n材料名3　大さじ1\n\n作り方\n\n1.\n2.\n3.";
 
   const prompt =
     `${basePrompt}\n` +
