@@ -23,6 +23,7 @@ const adContainer1 = document.getElementById('ad-container-1');
 const favoriteBtn = document.getElementById('favorite-btn');
 const showFavoritesBtn = document.getElementById('show-favorites-btn');
 const favoritesList = document.getElementById('favorites-list');
+const recentRecipesSection = document.getElementById('recent-recipes-section');
 
 // 選択肢要素
 const onlyInputCheckbox = document.getElementById('onlyInputIngredients');
@@ -111,21 +112,71 @@ firebase.auth().onAuthStateChanged((user) => {
 // -------------------------------------------------
 // ★ 2. Firestore 関連の処理 (保存/取得/表示)
 // -------------------------------------------------
+// ▼ レシピを保存する関数
+async function saveRecipe(userId, recipeTitle, recipeContent) {
+    if (!userId) {
+        alert("ログインしていません。ログイン後に保存してください。");
+        return;
+    }
 
-// ▼ レシピを保存する関数 (グローバルに移動)
-async function saveRecipe(userId, recipeContent) {
     try {
-        // 'favorites' コレクションに保存
+        // favorites コレクションに保存
         await db.collection("favorites").add({
-            userId: userId, // 検索用ID
-            recipeTitle: recipeContent.substring(0, 50) + "...", // タイトル（簡易）
+            userId: userId,
+            recipeTitle: recipeTitle,
             recipeContent: recipeContent,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+
         alert('レシピをお気に入りに保存しました！');
+
+        // 保存後、トップページの「みんなのレシピ」を即座に更新して反映させる
+        displayPublicRecipes();
+
     } catch (e) {
         console.error("Error saving document: ", e);
         alert('保存に失敗しました。: ' + e.message);
+    }
+}
+
+// ▼ みんなの生成レシピを表示する関数 (favoritesから全件取得)
+async function displayPublicRecipes() {
+    if (!recentRecipesSection) return;
+
+    try {
+        recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p style="text-align:center;">読み込み中...</p>';
+
+        // favoritesコレクションから、最新5件を取得 (userIdフィルタなし)
+        const snapshot = await db.collection("favorites")
+            .orderBy("createdAt", "desc")
+            .limit(5)
+            .get();
+
+        if (snapshot.empty) {
+            recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p>まだレシピがありません。</p>';
+            return;
+        }
+
+        let html = '<h3>みんなの生成レシピ (最新5件)</h3><ul style="padding-left: 20px;">';
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const title = data.recipeTitle || 'タイトルなし';
+            // 日付の整形
+            const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : '';
+
+            html += `
+                <li class="recent-recipe-card" onclick="showFullRecipe('${doc.id}')" style="cursor:pointer; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    <span style="font-weight:bold;">🍳 ${title}</span>
+                    <span style="font-size:0.8em; color:#888; margin-left:10px;">${dateStr}</span>
+                </li>`;
+        });
+
+        html += '</ul>';
+        recentRecipesSection.innerHTML = html;
+    } catch (e) {
+        console.error("Public recipe fetch error:", e);
+        recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p style="color:red;">読み込みエラーが発生しました。</p>';
     }
 }
 
@@ -282,6 +333,53 @@ form.addEventListener('submit', async (e) => {
 
         // ★ 完了後の処理: 保存ボタンの表示
         const user = firebase.auth().currentUser;
+        let finalTitle = "";
+        const hashIndex = fullMarkdown.indexOf("#");
+
+        if (hashIndex === -1) {
+            // 条件3: "#"が見つからなければ先頭部分50文字
+            finalTitle = fullMarkdown.substring(0, 50);
+        } else {
+            // "#"が見つかった場合
+            const searchStartIndex = hashIndex + 10; // "#"から10文字目以降を検索開始位置とする
+
+            // 10文字目以降が存在しない（文字列が短い）場合は末尾まで対象にするためのガード
+            if (searchStartIndex >= fullMarkdown.length) {
+                finalTitle = fullMarkdown.substring(hashIndex, hashIndex + 50);
+            } else {
+                // 10文字目以降で最初の半角スペースを探す
+                const halfSpaceIndex = fullMarkdown.indexOf(" ", searchStartIndex);
+                // 10文字目以降で最初の全角スペースを探す
+                const fullSpaceIndex = fullMarkdown.indexOf("　", searchStartIndex);
+
+                // どちらのスペースが先に出てくるか（見つからない場合は -1）
+                let endSpaceIndex = -1;
+
+                if (halfSpaceIndex !== -1 && fullSpaceIndex !== -1) {
+                    // 両方見つかったら、手前にある方を採用
+                    endSpaceIndex = Math.min(halfSpaceIndex, fullSpaceIndex);
+                } else if (halfSpaceIndex !== -1) {
+                    endSpaceIndex = halfSpaceIndex;
+                } else if (fullSpaceIndex !== -1) {
+                    endSpaceIndex = fullSpaceIndex;
+                }
+
+                if (endSpaceIndex !== -1) {
+                    // 条件2: スペースが見つかったら、そのスペースを最後の文字とする
+                    // (substringの第2引数は「そこを含まない」ため +1 してスペースを含める)
+                    finalTitle = fullMarkdown.substring(hashIndex, endSpaceIndex + 1);
+                } else {
+                    // 条件4: スペースが見つからなければ"#"から先頭50文字
+                    finalTitle = fullMarkdown.substring(hashIndex, hashIndex + 50);
+                }
+            }
+        }
+        // ユーザーがログインしていれば保存ボタンを表示
+        if (user) {
+            favoriteBtn.style.display = 'block';
+            // saveRecipe(userId, recipeTitle, recipeContent)
+            favoriteBtn.onclick = () => saveRecipe(user.uid, finalTitle, fullMarkdown);
+        }
         if (user) {
             favoriteBtn.style.display = 'block';
             // イベントリスナーの重複登録を防ぐため、onclickプロパティを使用
@@ -298,3 +396,5 @@ form.addEventListener('submit', async (e) => {
         submitBtn.textContent = '献立を考えてもらう';
     }
 });
+// ページ読み込み時に「みんなの生成レシピ」を表示
+displayPublicRecipes();
