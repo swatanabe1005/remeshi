@@ -166,10 +166,15 @@ async function displayPublicRecipes() {
             const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : '';
 
             html += `
-                <li class="recent-recipe-card" onclick="showFullRecipe('${doc.id}')" style="cursor:pointer; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                    <span style="font-weight:bold;">🍳 ${title}</span>
-                    <span style="font-size:0.8em; color:#888; margin-left:10px;">${dateStr}</span>
-                </li>`;
+               <li class="recent-recipe-card" style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div onclick="showFullRecipe('${doc.id}')" style="cursor:pointer;">
+                        <span style="font-weight:bold;">🍳 ${title}</span>
+                        <span style="font-size:0.8em; color:#888; margin-left:10px;">${dateStr}</span>
+                    </div>
+                    <button class="save-public-btn" onclick="savePublicRecipe('${doc.id}')" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-top: 5px;">
+                        お気に入りに追加
+                    </button>
+               </li>`;
         });
 
         html += '</ul>';
@@ -388,3 +393,36 @@ form.addEventListener('submit', async (e) => {
 });
 // ページ読み込み時に「みんなの生成レシピ」を表示
 displayPublicRecipes();
+
+// みんなのレシピをお気に入りに保存する関数
+async function savePublicRecipe(docId) {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        alert("ログインしていません。ログイン後に保存してください。");
+        return;
+    }
+
+    try {
+        // 公開されているレシピのドキュメントを取得
+        const doc = await db.collection("favorites").doc(docId).get();
+        if (!doc.exists) {
+            alert("レシピが見つかりませんでした。");
+            return;
+        }
+
+        const data = doc.data();
+        const title = data.recipeTitle;
+        const content = data.recipeContent;
+
+        // 既存の saveRecipe 関数を呼び出して保存
+        // (注意: saveRecipe 関数内でアラートが表示されます)
+        await saveRecipe(user.uid, title, content);
+
+        // ユーザーのお気に入り一覧も更新（表示中の場合）
+        displayFavorites();
+
+    } catch (e) {
+        console.error("Public recipe save error: ", e);
+        alert('お気に入りへの保存に失敗しました。: ' + e.message);
+    }
+}
