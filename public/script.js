@@ -139,12 +139,12 @@ async function saveRecipe(userId, recipeTitle, recipeContent) {
     }
 }
 
-// ▼ みんなの生成レシピを表示する関数 (favoritesから全件取得)
+// ▼ みんなのお気に入りレシピを表示する関数 (favoritesから全件取得)
 async function displayPublicRecipes() {
     if (!recentRecipesSection) return;
 
     try {
-        recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p style="text-align:center;">読み込み中...</p>';
+        recentRecipesSection.innerHTML = '<h3>みんなのお気に入りレシピ</h3><p style="text-align:center;">読み込み中...</p>';
 
         // favoritesコレクションから、最新5件を取得 (userIdフィルタなし)
         const snapshot = await db.collection("favorites")
@@ -153,11 +153,11 @@ async function displayPublicRecipes() {
             .get();
 
         if (snapshot.empty) {
-            recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p>まだレシピがありません。</p>';
+            recentRecipesSection.innerHTML = '<h3>みんなのお気に入りレシピ</h3><p>まだレシピがありません。</p>';
             return;
         }
 
-        let html = '<h3>みんなの生成レシピ (最新5件)</h3><ul style="padding-left: 20px;">';
+        let html = '<h3>みんなのお気に入りレシピ (最新5件)</h3><ul style="padding-left: 20px;">';
 
         snapshot.forEach(doc => {
             const data = doc.data();
@@ -181,7 +181,7 @@ async function displayPublicRecipes() {
         recentRecipesSection.innerHTML = html;
     } catch (e) {
         console.error("Public recipe fetch error:", e);
-        recentRecipesSection.innerHTML = '<h3>みんなの生成レシピ</h3><p style="color:red;">読み込みエラーが発生しました。</p>';
+        recentRecipesSection.innerHTML = '<h3>みんなのお気に入りレシピ</h3><p style="color:red;">読み込みエラーが発生しました。</p>';
     }
 }
 
@@ -391,7 +391,7 @@ form.addEventListener('submit', async (e) => {
         submitBtn.textContent = '献立を考えてもらう';
     }
 });
-// ページ読み込み時に「みんなの生成レシピ」を表示
+// ページ読み込み時に「みんなのお気に入りレシピ」を表示
 displayPublicRecipes();
 
 // みんなのレシピをお気に入りに保存する関数
